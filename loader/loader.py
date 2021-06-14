@@ -151,44 +151,32 @@ def load_file(fn, raise_bad_format=False):
     return secrets
 
 
-def load_environment(prefix="DJANGO_ENV_", **kwargs):
+def load_environment(prefix="DJANGO_ENV_"):
     """Load Django configuration variables from the enviroment.
 
     This function searches the environment for variables prepended
-    with ``prefix`` and attempts to validate that value against the
-    list of values in ``validation`` or by calling the function stored
-    in ``validation`` with the single argument of the value of the
-    environment variable.
+    with ``prefix``.  Currently, this function only reliably works for
+    string variables, but hopefully will work for other types,
+    dictionaries, and lists in the future.
 
     Parameters
     ----------
-    name : string, default="DJANGO_ENV_"
-        The name of the variable to be loaded.  This name will be
-        prefixed with ``prefix`` before searching the environment.
-    validation : object
-        Either a list of allowed values (defaults to the empty list)
-        or a function accepting one parameter that validates the value
-        and either returns the validated value or raises an
-        ``ImproperlyConfigured`` exception.
+    prefix : string, default="DJANGO_ENV_"
+        Prefix for environment variables.  This prefix should be
+        prepended to all valid variable names in the environment.
 
     Returns
     -------
-    string
-        The value stored in the environment variable.
-
-    Raises
-    ------
-    django.core.exceptions.ImproperlyConfigured
-        Raises an ``ImproperlyConfigured`` exception on blank or
-        non-existent values, with an error message.
+    dict
+        A dictionary, possibly empty, of configuration variables and
+        values.
     """
     config = {}
-    for (k, v) in kwargs.items():
-        var = prefix + k
-        try:
-            config[k] = os.environ[var]
-        except KeyError:
-            config[k] = kwargs[k]
+
+    for (key, value) in os.environ:
+        if key.startswith(prefix):
+            name = key.removeprefix(prefix)
+            config[name] = value
 
     return config
 
