@@ -10,7 +10,7 @@
 #
 # ******************************************************************************
 
-.PHONY : build clean commit dist lint pip test test-all upload upload-test
+.PHONY : build clean commit dist lint pip secret-key test test-all upload upload-test
 
 test-all:
 	pytest -vv --cov loader --cov-report term --cov-report html
@@ -38,6 +38,9 @@ lint :
 
 pip :
 	pip install -r requirements.txt
+
+secret-key :
+	python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key());"
 
 test:
 	pytest
