@@ -13,6 +13,7 @@
 """Loader module."""
 
 from .loader import dump_secrets
+from .loader import generate_secret_key
 from .loader import load_environment
 from .loader import load_file
 from .loader import load_secrets

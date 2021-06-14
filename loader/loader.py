@@ -29,6 +29,22 @@ from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
 
+def generate_secret_key():
+    """Generate a secret key for a Django app.
+
+    Generate a secret key for a Django app, using
+    ``django.core.management.utils.get_random_secret_key``.
+
+    Returns
+    -------
+    string
+        A random secret key.
+    """
+    from django.core.management.utils import get_random_secret_key
+
+    return get_random_secret_key()
+
+
 def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
     """Load a list of configuration variables.
 

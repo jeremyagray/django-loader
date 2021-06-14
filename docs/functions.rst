@@ -18,6 +18,7 @@ loader
 ------
 
 .. autofunction:: loader.dump_secrets
+.. autofunction:: loader.generate_secret_key
 .. autofunction:: loader.load_environment
 .. autofunction:: loader.load_file
 .. autofunction:: loader.load_secrets
