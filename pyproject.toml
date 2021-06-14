@@ -157,11 +157,3 @@ django-loader = "loader:main"
 [tool.pytest.ini_options]
 
 DJANGO_SETTINGS_MODULE = "fake.settings"
-
-flake8-max-complexity = 20
-flake8-max-line-length = 88
-
-flake8-ignore = [
-    "* E203, W503",
-    "__init__.py F401",
-]
