@@ -12,4 +12,4 @@
 #
 """Loader module."""
 
-from loader import load_secrets
+from .loader import load_secrets
