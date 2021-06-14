@@ -12,4 +12,12 @@
 #
 """Loader module."""
 
+from .loader import dump_secrets
+from .loader import load_environment
+from .loader import load_file
 from .loader import load_secrets
+from .loader import main
+from .loader import merge
+from .loader import validate_falsy
+from .loader import validate_not_empty_string
+from .loader import validate_truthy
