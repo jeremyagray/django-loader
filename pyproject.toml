@@ -62,16 +62,13 @@ repair = false
 types = [
 "build",
 "ci",
-"db",
 "depends",
-"deploy",
 "docs",
 "feat",
 "fix",
-"graphics",
-"layout",
 "perf",
 "refactor",
+"release",
 "style",
 "test"
 ]
