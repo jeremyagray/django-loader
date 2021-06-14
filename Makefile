@@ -10,18 +10,18 @@
 #
 # ******************************************************************************
 
-.PHONY : build clean commit dist lint pip test test-all
+.PHONY : build clean commit dist lint pip test test-all upload upload-test
 
 test-all:
 	pytest -vv --cov loader --cov-report term --cov-report html
 
 build :
-	cd docs && make html
+	# cd docs && make html
 	pip install -q build
 	python -m build
 
 clean :
-	cd docs && make clean
+	# cd docs && make clean
 
 commit :
 	pre-commit run --all-files
@@ -41,3 +41,9 @@ test:
 
 requirements.txt: poetry.lock
 	./freeze.sh > $(@)
+
+upload:
+	python3 -m twine upload --verbose dist/*
+
+upload-test:
+	python3 -m twine upload --verbose --repository testpypi dist/*
