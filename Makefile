@@ -16,12 +16,12 @@ test-all:
 	pytest -vv --cov loader --cov-report term --cov-report html
 
 build :
-	# cd docs && make html
+	cd docs && make html
 	pip install -q build
 	python -m build
 
 clean :
-	# cd docs && make clean
+	cd docs && make clean
 	rm -rf build
 	rm -rf dist
 	rm -rf django_loader.egg-info
