@@ -189,7 +189,7 @@ def load_environment(prefix="DJANGO_ENV_"):
     """
     config = {}
 
-    for (key, value) in os.environ:
+    for (key, value) in os.environ.items():
         if key.startswith(prefix):
             name = key.removeprefix(prefix)
             config[name] = value
