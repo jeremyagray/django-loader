@@ -77,7 +77,7 @@ types = [
 ]
 
 scopes = [
-"blog",
+"loader",
 "fake",
 ]
 
