@@ -22,6 +22,9 @@ build :
 
 clean :
 	# cd docs && make clean
+	rm -rf build
+	rm -rf dist
+	rm -rf django_loader.egg-info
 
 commit :
 	pre-commit run --all-files
