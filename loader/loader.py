@@ -191,7 +191,10 @@ def load_environment(prefix="DJANGO_ENV_"):
 
     for (key, value) in os.environ.items():
         if key.startswith(prefix):
-            name = key.removeprefix(prefix)
+            if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
+                name = key[len(prefix) :]
+            else:
+                name = key.removeprefix(prefix)
             config[name] = value
 
     return config
