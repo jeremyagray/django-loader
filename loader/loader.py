@@ -58,7 +58,7 @@ def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
     ----------
     fn : string, default=".env"
         Configuration filename, defaults to ``.env``.  May be in TOML,
-        JSON, YAML, or BespOn formats.  Formats will be attempted in this
+        JSON, YAML, or BespON formats.  Formats will be attempted in this
         order.
     prefix : string, default="DJANGO_ENV_"
         Prefix for environment variables.  This prefix will be
@@ -72,13 +72,6 @@ def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
     -------
     dict
         A dictionary of configuration variables and their values.
-
-    Raises
-    ------
-    FileNotFoundError
-        Raised if the configuration file is not found.
-    django.core.exceptions.ImproperlyConfigured
-        Raised if the the configuration file format is not recognized.
     """
     return merge(kwargs, load_file(fn), load_environment(prefix))
 
@@ -287,48 +280,48 @@ def validate_truthy(name, val):
     return True
 
 
-def set_or_fail_on_unset(val):
-    """Raise ``ImproperlyConfigured()`` if ``val`` is not set.
+# def set_or_fail_on_unset(val):
+#     """Raise ``ImproperlyConfigured()`` if ``val`` is not set.
 
-    Return the configuration value if set, otherwise raise
-    ``django.core.exceptions.ImproperlyConfigured()`` to abort.
+#     Return the configuration value if set, otherwise raise
+#     ``django.core.exceptions.ImproperlyConfigured()`` to abort.
 
-    Parameters
-    ----------
-    val : string
-        Configuration variable that should be set to a value.
+#     Parameters
+#     ----------
+#     val : string
+#         Configuration variable that should be set to a value.
 
-    Returns
-    -------
-    string
-        The variable value, if set.
-    """
-    if not val:
-        raise ImproperlyConfigured("A required configuration variable is not set.")
+#     Returns
+#     -------
+#     string
+#         The variable value, if set.
+#     """
+#     if not val:
+#         raise ImproperlyConfigured("A required configuration variable is not set.")
 
-    return val
+#     return val
 
 
-def _validate(name, val, validation=[]):
-    """Validate a django configuration variable."""
-    env_name = "DJANGO_" + name
+# def _validate(name, val, validation=[]):
+#     """Validate a django configuration variable."""
+#     env_name = "DJANGO_" + name
 
-    if isinstance(validation, types.FunctionType):
-        try:
-            return validation(val)
-        except ImproperlyConfigured:
-            raise
-    else:
-        if len(validation) > 0:
-            if not (val in validation):
-                raise ImproperlyConfigured(
-                    f"{name} can not have value {val};"
-                    f" must be one of [{', '.join(validation)}]."
-                )
-                return
+#     if isinstance(validation, types.FunctionType):
+#         try:
+#             return validation(val)
+#         except ImproperlyConfigured:
+#             raise
+#     else:
+#         if len(validation) > 0:
+#             if not (val in validation):
+#                 raise ImproperlyConfigured(
+#                     f"{name} can not have value {val};"
+#                     f" must be one of [{', '.join(validation)}]."
+#                 )
+#                 return
 
-        print(f"{name} loaded from {env_name}.")
-        return val
+#         print(f"{name} loaded from {env_name}.")
+#         return val
 
 
 def dump_secrets(fmt="TOML", **kwargs):
