@@ -25,15 +25,15 @@ The script interface is able to convert between all available formats.
 Roadmap
 =======
 
-#. Implement complete interoperability with TOML, JSON, YAML, and BespON for
-   configuration. (target: 0.5.0)
-
-   * ``Config().__str__()`` should output any format
-     * TOML (finished: 0.4.3)
-     * JSON (finished: 0.4.3)
-     * YAML
-     * BespON
-   * streamline testing fixture data formats
+#. Change from loading one configuration file to one or a list of
+   configuration files, with successive files having precedence over
+   previous ones.
+#. Implement validation functions to provide for customizable data
+   validation and security checks.
+#. Implement environment variable naming scheme to mimic use of
+   dictionaries in other formats.
+#. Add simple command line interface options with ``argparse`` and add
+   usage to doumentation.
 
 Installation
 ============
