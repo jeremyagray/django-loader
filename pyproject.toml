@@ -133,15 +133,18 @@ toml = "^0.10"
 
 Sphinx = "^3.4"
 black = { version = "*", allow-prereleases = true }
+coverage = {version = "^5.5", extras = ["toml"]}
 flake8 = "^3.8"
 flake8-docstrings = "^1.5"
-isort = "^5.6"
 hypothesis = "^6.9.0"
+isort = "^5.6"
 pccc = "^0.4"
 pre-commit = "^2.9"
+pyfakefs = "^4.3"
 pytest = "^6.1"
 pytest-cov = "^2.10"
 pytest-django = "^4.1"
+tox = "^3.23.1"
 twine = "^3.4.1"
 
 [tool.poetry.scripts]

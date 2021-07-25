@@ -15,6 +15,7 @@
 # Python.
 .coverage
 .env
+.tox
 __pycache__
 build
 dist
