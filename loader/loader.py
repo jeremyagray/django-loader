@@ -352,24 +352,28 @@ def dump_secrets(fmt="TOML", **kwargs):
         environment variables.
     """
     if fmt == "TOML":
-        print(toml.dumps(kwargs))
+        return toml.dumps(kwargs)
     elif fmt == "JSON":
-        print(json.dumps(kwargs))
+        return json.dumps(kwargs)
     elif fmt == "YAML":
+        # Let's jump through some hoops for the sake of streams.
+        # https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
+        from ruamel.yaml.compat import StringIO
+
+        stream = StringIO()
         yaml = YAML(typ="safe")
-        print(yaml.dump(kwargs, sys.stdout))
+        yaml.dump(kwargs, stream)
+        return stream.getvalue()
     elif fmt == "BespON":
-        print(bespon.dumps(kwargs))
-    elif fmt == "ENV":
+        return bespon.dumps(kwargs)
+    else:
         # print(env_dumps(kwargs))
         raise NotImplementedError
-
-    return
 
 
 def main():
     """Run as script, to access ``dump()`` functions."""
-    dump_secrets(**load_secrets(**{"ALLOWED_HOSTS": ["bob is your uncle"]}))
+    print(dump_secrets(**load_secrets(**{"ALLOWED_HOSTS": ["bob is your uncle"]})))
 
 
 if __name__ == "__main__":
