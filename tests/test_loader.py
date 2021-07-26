@@ -362,7 +362,7 @@ def test_validate_truthy_truthy_values():
 
 # loader.load_environment() tests.
 def test_load_environment(monkeypatch):
-    """Test load_environment()."""
+    """Should load environment dict with default prefix."""
     monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "test")
     expected = {
         "TEST_VAR": "test",
@@ -373,7 +373,7 @@ def test_load_environment(monkeypatch):
 
 
 def test_load_environment_prefix(monkeypatch):
-    """Test load_environment() with a custom prefix."""
+    """Should load environment dict with custom prefix."""
     monkeypatch.setenv("MY_APP_PREFIX_TEST_VAR", "test")
     expected = {
         "TEST_VAR": "test",
@@ -384,7 +384,7 @@ def test_load_environment_prefix(monkeypatch):
 
 
 def test_load_environment_no_prefix(monkeypatch):
-    """Test load_environment() with variable missing prefix."""
+    """Should load empty dict with unprefixed variables."""
     monkeypatch.setenv("TEST_VAR", "test")
     expected = {}
     actual = loader.load_environment()
@@ -393,11 +393,216 @@ def test_load_environment_no_prefix(monkeypatch):
 
 
 def test_load_environment_missing():
-    """Test load_environment() with no variables."""
+    """Should load empty dict with no environment variables."""
     expected = {}
     actual = loader.load_environment()
 
     assert actual == expected
+
+
+def test_load_list(monkeypatch):
+    """Should load list with list-style environment variables."""
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__2", "orange")
+    expected = {
+        "FRUIT": [
+            "apple",
+            "banana",
+            "orange",
+        ],
+    }
+    actual = loader.load_environment()
+
+    assert actual == expected
+
+
+def test_load_nested_list(monkeypatch):
+    """Should load nested list with list-style environment variables."""
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__2", "orange")
+    expected = {
+        "FOOD": {
+            "FRUIT": [
+                "apple",
+                "banana",
+                "orange",
+            ],
+        },
+    }
+    actual = loader.load_environment()
+
+    assert actual == expected
+
+
+def test_load_dict(monkeypatch):
+    """Should load dict with dict-style environment variables."""
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
+    expected = {
+        "FRUIT": {
+            "APPLE": "2",
+            "BANANA": "3",
+            "ORANGE": "5",
+        },
+    }
+    actual = loader.load_environment()
+
+    assert actual == expected
+
+
+def test_load_nested_dict(monkeypatch):
+    """Should load nested dict with dict-style environment variables."""
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__ORANGE", "5")
+    expected = {
+        "FOOD": {
+            "FRUIT": {
+                "APPLE": "2",
+                "BANANA": "3",
+                "ORANGE": "5",
+            },
+        },
+    }
+    actual = loader.load_environment()
+
+    assert actual == expected
+
+
+def test_load_mixed(monkeypatch):
+    """Should load all styles of environment variables mixed."""
+    monkeypatch.setenv("DJANGO_ENV_BREAKFAST", "toast")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__2", "orange")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__2", "orange")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__ORANGE", "5")
+    expected = {
+        "BREAKFAST": "toast",
+        "FRUITLIST": [
+            "apple",
+            "banana",
+            "orange",
+        ],
+        "FRUIT": {
+            "APPLE": "2",
+            "BANANA": "3",
+            "ORANGE": "5",
+        },
+        "FOOD": {
+            "FRUITLIST": [
+                "apple",
+                "banana",
+                "orange",
+            ],
+            "FRUIT": {
+                "APPLE": "2",
+                "BANANA": "3",
+                "ORANGE": "5",
+            },
+        },
+    }
+    actual = loader.load_environment()
+
+    print(expected)
+    print(actual)
+    assert actual == expected
+
+
+def test_load_mixed_duplicate(monkeypatch):
+    """Should load all styles of environment variables mixed."""
+    monkeypatch.setenv("DJANGO_ENV_FRUIT", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
+
+    with pytest.raises(ImproperlyConfigured):
+        loader.load_environment()
+
+
+def test_keys_are_indices():
+    """Should determine if keys are list indices."""
+    # They are indices.
+    ds = {
+        "0": "apple",
+        "1": "banana",
+        "2": "orange",
+    }
+
+    assert loader._keys_are_indices(ds) is True
+
+    # Non-integer index.
+    ds = {
+        "zero": "apple",
+        "1": "banana",
+        "2": "orange",
+    }
+
+    # Wrong start.
+    ds = {
+        "3": "apple",
+        "1": "banana",
+        "2": "orange",
+    }
+
+    assert loader._keys_are_indices(ds) is False
+
+    # Non-sequential.
+    ds = {
+        "0": "apple",
+        "2": "banana",
+        "3": "orange",
+    }
+
+    assert loader._keys_are_indices(ds) is False
+
+
+def test_convert_dict_to_list():
+    """Should convert dict to list."""
+    listdict = {
+        "0": "apple",
+        "1": "banana",
+        "2": "orange",
+    }
+
+    expected = [
+        "apple",
+        "banana",
+        "orange",
+    ]
+
+    assert loader._convert_dict_to_list(listdict) == expected
+
+
+def test_convert_listdict_to_list():
+    """Should convert list-like dicts to lists in a data structure."""
+    listdict = {
+        "fruit": {
+            "0": "apple",
+            "1": "banana",
+            "2": "orange",
+        },
+    }
+
+    expected = {
+        "fruit": [
+            "apple",
+            "banana",
+            "orange",
+        ],
+    }
+
+    assert loader._convert_listdict_to_list(listdict) == expected
 
 
 # loader.load_secrets() tests.

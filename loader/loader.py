@@ -160,6 +160,53 @@ def load_file(fn, raise_bad_format=False):
     return secrets
 
 
+def _keys_are_indices(d):
+    """Determine if the keys of a dict are list indices."""
+    # All integers?
+    keys = []
+    for k in d.keys():
+        try:
+            keys.append(int(k))
+        except (ValueError):
+            return False
+
+    keys = sorted(keys)
+
+    # Zero start?
+    if min(keys) != 0:
+        return False
+
+    # Consecutive?
+    if keys != list(range(0, max(keys) + 1)):
+        return False
+
+    return True
+
+
+def _convert_dict_to_list(d):
+    """Convert a list-style dict to a list."""
+    keys = sorted(d.keys())
+    the_list = []
+    for k in keys:
+        the_list.append(d[k])
+
+    return the_list
+
+
+def _convert_listdict_to_list(ds):
+    """Convert lists as dicts to lists in a data structure."""
+    for (k, v) in ds.items():
+        if isinstance(ds[k], dict):
+            # If the item points a dict, descend.
+            ds[k] = _convert_listdict_to_list(ds[k])
+            # We're back.  Now check if the dict is a list-style dict
+            # and maybe convert to a list.
+            if _keys_are_indices(ds[k]):
+                ds[k] = _convert_dict_to_list(ds[k])
+
+    return ds
+
+
 def load_environment(prefix="DJANGO_ENV_"):
     """Load Django configuration variables from the enviroment.
 
@@ -184,11 +231,36 @@ def load_environment(prefix="DJANGO_ENV_"):
 
     for (key, value) in os.environ.items():
         if key.startswith(prefix):
+            # Find the prefixed values and strip the prefix.
             if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
                 name = key[len(prefix) :]
             else:
                 name = key.removeprefix(prefix)
-            config[name] = value
+
+            if "__" not in name:
+                # Find the non-dict and non-list pairs and add them to
+                # the dict.
+                config[name] = value
+            else:
+                # Handle the flattened data structures, treating the
+                # list type variables as dicts.
+                # Based on:
+                # https://gist.github.com/fmder/494aaa2dd6f8c428cede
+                keys = name.split("__")
+                sub_config = config
+                for k in keys[:-1]:
+                    try:
+                        if not isinstance(sub_config[k], dict):
+                            raise ImproperlyConfigured(
+                                f"{k} is defined multiple times in the environment."
+                            )
+                        sub_config = sub_config[k]
+                    except (KeyError):
+                        sub_config[k] = {}
+                        sub_config = sub_config[k]
+                sub_config[keys[-1]] = value
+
+    config = _convert_listdict_to_list(config)
 
     return config
 

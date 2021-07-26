@@ -12,6 +12,9 @@
 #
 """Loader module."""
 
+from .loader import _convert_dict_to_list
+from .loader import _convert_listdict_to_list
+from .loader import _keys_are_indices
 from .loader import dump_secrets
 from .loader import generate_secret_key
 from .loader import load_environment
