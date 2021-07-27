@@ -514,8 +514,6 @@ def test_load_mixed(monkeypatch):
     }
     actual = loader.load_environment()
 
-    print(expected)
-    print(actual)
     assert actual == expected
 
 
@@ -528,6 +526,76 @@ def test_load_mixed_duplicate(monkeypatch):
 
     with pytest.raises(ImproperlyConfigured):
         loader.load_environment()
+
+
+def test_dump_mixed(monkeypatch):
+    """Should load and all styles of environment variables mixed."""
+    monkeypatch.setenv("DJANGO_ENV_BREAKFAST", "toast")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__2", "orange")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__2", "orange")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__ORANGE", "5")
+
+    expected = """export DJANGO_ENV_BREAKFAST='toast'
+export DJANGO_ENV_FRUITLIST_0='apple'
+export DJANGO_ENV_FRUITLIST_1='banana'
+export DJANGO_ENV_FRUITLIST_2='orange'
+export DJANGO_ENV_FRUIT_APPLE='2'
+export DJANGO_ENV_FRUIT_BANANA='3'
+export DJANGO_ENV_FRUIT_ORANGE='5'
+export DJANGO_ENV_FOOD_FRUITLIST_0='apple'
+export DJANGO_ENV_FOOD_FRUITLIST_1='banana'
+export DJANGO_ENV_FOOD_FRUITLIST_2='orange'
+export DJANGO_ENV_FOOD_FRUIT_APPLE='2'
+export DJANGO_ENV_FOOD_FRUIT_BANANA='3'
+export DJANGO_ENV_FOOD_FRUIT_ORANGE='5'"""
+
+    actual = loader.dump_environment(loader.load_environment())
+
+    assert actual == expected
+
+
+def test_dump_mixed_no_export(monkeypatch):
+    """Should load and all styles of environment variables mixed."""
+    monkeypatch.setenv("DJANGO_ENV_BREAKFAST", "toast")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FRUITLIST__2", "orange")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__0", "apple")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__1", "banana")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUITLIST__2", "orange")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__APPLE", "2")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__BANANA", "3")
+    monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__ORANGE", "5")
+
+    expected = """DJANGO_ENV_BREAKFAST='toast'
+DJANGO_ENV_FRUITLIST_0='apple'
+DJANGO_ENV_FRUITLIST_1='banana'
+DJANGO_ENV_FRUITLIST_2='orange'
+DJANGO_ENV_FRUIT_APPLE='2'
+DJANGO_ENV_FRUIT_BANANA='3'
+DJANGO_ENV_FRUIT_ORANGE='5'
+DJANGO_ENV_FOOD_FRUITLIST_0='apple'
+DJANGO_ENV_FOOD_FRUITLIST_1='banana'
+DJANGO_ENV_FOOD_FRUITLIST_2='orange'
+DJANGO_ENV_FOOD_FRUIT_APPLE='2'
+DJANGO_ENV_FOOD_FRUIT_BANANA='3'
+DJANGO_ENV_FOOD_FRUIT_ORANGE='5'"""
+
+    actual = loader.dump_environment(loader.load_environment(), export=False)
+
+    assert actual == expected
 
 
 def test_keys_are_indices():
@@ -686,5 +754,8 @@ def test_dump_secrets_env():
         "SOME_VAR": "test",
     }
 
-    with pytest.raises(NotImplementedError):
-        loader.dump_secrets(fmt="ENV", **config)
+    expected = "export DJANGO_ENV_SOME_VAR='test'"
+
+    actual = loader.dump_secrets(fmt="ENV", **config)
+
+    assert actual == expected

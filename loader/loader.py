@@ -265,6 +265,51 @@ def load_environment(prefix="DJANGO_ENV_"):
     return config
 
 
+def dump_environment(config, prefix="DJANGO_ENV_", export=True):
+    """Dump configuration as an environment variable string.
+
+    Parameters
+    ----------
+    config : dict
+        The configuration dict.
+    prefix : string, default="DJANGO_ENV_"
+        Prefix for environment variables.  This prefix should be
+        prepended to all valid variable names in the environment.
+    export : boolean, default=True
+        Prepend each environment variable string with "export ", or
+        not.
+
+    Returns
+    -------
+    string
+        The current configuration as a string setting environment
+        variables.
+    """
+    stack = []
+    dumps = []
+    if export:
+        exp = "export "
+    else:
+        exp = ""
+
+    # Convert the config dict into a list (stack).
+    for (k, v) in config.items():
+        stack.append((k, v))
+
+    while stack:
+        (k, v) = stack.pop(0)
+        if isinstance(v, list):
+            for (i, sv) in enumerate(v):
+                stack.append((f"{k}_{i}", sv))
+        elif isinstance(v, dict):
+            for (sk, sv) in v.items():
+                stack.append((f"{k}_{sk}", sv))
+        else:
+            dumps.append(f"{str(k)}='{str(v)}'")
+
+    return "\n".join(f"{exp}{prefix}{line}" for line in dumps)
+
+
 def validate_not_empty_string(name, val):
     """Validate that ``val`` is not an empty string.
 
@@ -405,16 +450,10 @@ def dump_secrets(fmt="TOML", **kwargs):
     Parameters
     ----------
     fmt : string, default="TOML"
-        The dump format, one of "TOML", "JSON", "YAML", "BespON", or
-        "ENV" (not currently implemented).
+        The dump format, one of ``TOML``, ``JSON``, ``YAML``,
+        ``BespON``, or ``ENV``.
     kwargs : dict
         A dictionary of configuration variables.
-
-    Raises
-    ------
-    NotImplementedError
-        Raises ``NotImplementedError`` for format ``ENV`` to dump
-        environment variables.
     """
     if fmt == "TOML":
         return toml.dumps(kwargs)
@@ -432,12 +471,16 @@ def dump_secrets(fmt="TOML", **kwargs):
     elif fmt == "BespON":
         return bespon.dumps(kwargs)
     else:
-        # print(env_dumps(kwargs))
-        raise NotImplementedError
+        return dump_environment(kwargs)
 
 
 def main():
     """Run as script, to access ``dump()`` functions."""
+    # Desired functions:
+    # create SECRET_KEY
+    # load and dump environment
+    # cli help
+    # cli copyright/license
     print(dump_secrets(**load_secrets(**{"ALLOWED_HOSTS": ["bob is your uncle"]})))
 
 
