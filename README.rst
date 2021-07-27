@@ -30,8 +30,6 @@ Roadmap
    previous ones.
 #. Implement validation functions to provide for customizable data
    validation and security checks.
-#. Implement environment variable naming scheme to mimic use of
-   dictionaries in other formats.
 #. Add simple command line interface options with ``argparse`` and add
    usage to doumentation.
 
