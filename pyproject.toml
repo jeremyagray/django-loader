@@ -88,7 +88,7 @@ required_footers = [
 
 [tool.poetry]
 
-authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
+authors = ["Jeremy A Gray <gray@flyquackswim.com>"]
 description = "django-loader:  a configuration and secret loader for Django"
 name = "django-loader"
 version = "0.0.5"
@@ -109,6 +109,7 @@ classifiers = [
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
   "Topic :: Internet :: WWW/HTTP :: Site Management",
 ]
 
