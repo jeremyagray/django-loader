@@ -124,11 +124,11 @@ include = [
 
 [tool.poetry.dependencies]
 
-Django = "^3.2"
-bespon = "^0.6.0"
-python = "^3.9"
-"ruamel.yaml" = "^0.17.9"
-toml = "^0.10"
+Django = "^2.2 || ^3.2"
+bespon = "^0.6"
+python = ">=3.6.1,<4.0"
+"ruamel.yaml" = "^0"
+toml = "^0"
 
 [tool.poetry.dev-dependencies]
 
@@ -137,16 +137,16 @@ black = { version = "*", allow-prereleases = true }
 coverage = {version = "^5.5", extras = ["toml"]}
 flake8 = "^3.8"
 flake8-docstrings = "^1.5"
-hypothesis = "^6.9.0"
+hypothesis = "^6.9"
 isort = "^5.6"
-pccc = "^0.4"
+pccc = "^0"
 pre-commit = "^2.9"
 pyfakefs = "^4.3"
 pytest = "^6.1"
 pytest-cov = "^2.10"
 pytest-django = "^4.1"
-tox = "^3.23.1"
-twine = "^3.4.1"
+tox = "^3.23"
+twine = "^3.4"
 
 [tool.poetry.scripts]
 
