@@ -2,9 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# fake/settings.py:  fake project settings
-#
-# Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -14,12 +12,23 @@
 
 from pathlib import Path
 
+from django import VERSION
+
+import loader
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-1=-fer_+5!(w&hp_a2++9cl+q@k45y#)xtdnt0x-7xri*-gs0$"
 DEBUG = True
-ALLOWED_HOSTS = []
+
+secrets = loader.load_secrets(
+    **{
+        "ALLOWED_HOSTS": [],
+    }
+)
+
+ALLOWED_HOSTS = secrets["ALLOWED_HOSTS"]
 
 # Application definition.
 INSTALLED_APPS = [
@@ -87,8 +96,10 @@ for validator in VALIDATORS:
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
+
+if VERSION < (4, 0, 0):
+    USE_L10N = True
 
 # Static files.
 STATIC_URL = "/static/"
