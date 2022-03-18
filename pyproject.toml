@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -60,30 +60,30 @@ spell_check = false
 repair = false
 
 types = [
-"build",
-"ci",
-"depends",
-"docs",
-"feat",
-"fix",
-"perf",
-"refactor",
-"release",
-"style",
-"test"
+  "build",
+  "ci",
+  "depends",
+  "docs",
+  "feat",
+  "fix",
+  "perf",
+  "refactor",
+  "release",
+  "style",
+  "test"
 ]
 
 scopes = [
-"loader",
-"fake",
+  "loader",
+  "fake",
 ]
 
 footers = [
-"signed-off-by"
+  "signed-off-by"
 ]
 
 required_footers = [
-"signed-off-by"
+  "signed-off-by"
 ]
 
 [tool.poetry]
@@ -103,6 +103,7 @@ classifiers = [
   "Environment :: Console",
   "Framework :: Django :: 2.2",
   "Framework :: Django :: 3.2",
+  "Framework :: Django :: 4.0",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.6",
@@ -124,7 +125,7 @@ include = [
 
 [tool.poetry.dependencies]
 
-Django = "^2.2 || ^3.2"
+Django = "^2.2 || ^3.2 || ^4.0"
 bespon = "^0.6"
 python = ">=3.6.1,<4.0"
 "ruamel.yaml" = "^0"
