@@ -13,7 +13,7 @@
 .PHONY : build clean commit dist lint pip secret-key test test-all upload upload-test
 
 test-all:
-	pytest -vv --cov loader --cov-report term --cov-report html
+	pytest -vv --cov fake --cov loader --cov-report term --cov-report html
 
 build :
 	cd docs && make html
