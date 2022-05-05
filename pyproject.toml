@@ -60,8 +60,6 @@ spell_check = false
 repair = false
 
 types = [
-  "build",
-  "ci",
   "depends",
   "docs",
   "feat",
@@ -70,12 +68,13 @@ types = [
   "refactor",
   "release",
   "style",
-  "test"
+  "test",
 ]
 
 scopes = [
   "loader",
   "fake",
+  "tooling",
 ]
 
 footers = [
