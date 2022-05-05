@@ -94,21 +94,23 @@ def merge(defaults, file, env):
     return config
 
 
-def load_file(fn, raise_bad_format=False):
+def load_file(fn, raise_bad_format=True):
     """Attempt to load configuration variables from ``fn``.
 
     Attempt to load configuration variables from ``fn``.  If ``fn``
-    does not exist or is not a recognized format, return an empty dict
-    unless ``raise_bad_format`` is ``True``.
+    does not exist or is not a recognized format, return an empty
+    dict.  Raises ``ImproperlyConfigured`` if the file exists and does
+    not match a recognized format unless ``raise_bad_format`` is
+    ``False``.
 
     Parameters
     ----------
     fn : string
         Filename from which to load configuration values.
-    raise_bad_format : boolean, default=False
+    raise_bad_format : boolean, default=True
         Determine whether to raise
         ``django.core.exceptions.ImproperlyConfigured`` if the file
-        format is not recognized.  Default is ``False``.
+        format is not recognized.  Default is ``True``.
 
     Returns
     -------
@@ -132,13 +134,16 @@ def load_file(fn, raise_bad_format=False):
     with open(fn, "r") as f:
         try:
             secrets = toml.load(f)
-        except (toml.TomlDecodeError):
-            pass
+            return secrets
+        except (toml.TomlDecodeError) as error:
+            print(f"toml error: {error}")
     # Attempt to load JSON.
     with open(fn, "r") as f:
         try:
             secrets = json.load(f)
-        except (json.JSONDecodeError):
+            return secrets
+        except (json.JSONDecodeError) as error:
+            print(f"json error: {error}")
             pass
     # Attempt to load YAML, with ruamel.yaml and YAML 1.2.
     # Overachiever.
@@ -146,18 +151,23 @@ def load_file(fn, raise_bad_format=False):
         try:
             yaml = YAML(typ="safe")
             secrets = yaml.load(f)
-        except (YAMLError):
+            return secrets
+        except (YAMLError) as error:
+            print(f"yaml error: {error}")
             pass
     # Attempt to load BespON.  Geek.
     with open(fn, "r") as f:
         try:
             secrets = bespon.load(f)
-        except (bespon.erring.DecodingException):
-            # Everything failed, so raise.
-            if raise_bad_format:
-                raise ImproperlyConfigured(
-                    f"Configuration file {fn} is not a recognized format."
-                )
+            return secrets
+        except (bespon.erring.DecodingException) as error:
+            print(f"bespon error: {error}")
+            pass
+
+    if raise_bad_format:
+        raise ImproperlyConfigured(
+            f"Configuration file {Path(fn).resolve()} is not a recognized format."
+        )
 
     return secrets
 

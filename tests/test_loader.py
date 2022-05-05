@@ -140,8 +140,21 @@ def test_merge_one_default():
 
 
 # loader.load_file() tests.
-def test_load_file_nonexistent():
+def test_load_file_nonexistent_no_raise():
     """Should return an empty dict with no file."""
+    actual = loader.load_file("not_a_file", raise_bad_format=False)
+    expected = {}
+
+    assert actual == expected
+
+
+def test_load_file_nonexistent_raise():
+    """Should return an empty dict with no file."""
+    actual = loader.load_file("not_a_file", raise_bad_format=True)
+    expected = {}
+
+    assert actual == expected
+
     actual = loader.load_file("not_a_file")
     expected = {}
 
@@ -218,20 +231,6 @@ def test_load_file_valid_bespon(fs):
     assert actual == expected
 
 
-def test_load_bad_format_no_raise(fs):
-    """Should return an empty dict on bad file format."""
-    # Need a fake file here.
-    fn = ".env"
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        file.write("{{yaml:sucks}}")
-
-    actual = loader.load_file(fn)
-    expected = {}
-
-    assert actual == expected
-
-
 def test_load_bad_format_raise(fs):
     """Should raise ``ImproperlyConfigured`` on bad file format."""
     # Need a fake file here.
@@ -241,7 +240,24 @@ def test_load_bad_format_raise(fs):
         file.write("{{yaml:sucks}}")
 
     with pytest.raises(ImproperlyConfigured):
+        loader.load_file(fn)
+
+    with pytest.raises(ImproperlyConfigured):
         loader.load_file(fn, raise_bad_format=True)
+
+
+def test_load_bad_format_no_raise(fs):
+    """Should return an empty dict on bad file format."""
+    # Need a fake file here.
+    fn = ".env"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write("{{yaml:sucks}}")
+
+    actual = loader.load_file(fn, raise_bad_format=False)
+    expected = {}
+
+    assert actual == expected
 
 
 # loader.generate_secret_key() tests.
