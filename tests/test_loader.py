@@ -2,9 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# test_loader.py:  tests for loader.py
-#
-# Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -148,6 +146,12 @@ def test_load_file_nonexistent():
     expected = {}
 
     assert actual == expected
+
+
+def test_load_file_nonexistent_warn():
+    """Should warn on non-existent file."""
+    with pytest.warns(UserWarning):
+        loader.load_file("not_a_file")
 
 
 def test_load_file_valid_toml(fs):

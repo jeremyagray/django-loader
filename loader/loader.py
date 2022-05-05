@@ -20,6 +20,7 @@ import json
 import os
 import sys
 import types
+import warnings
 from pathlib import Path
 
 import bespon
@@ -124,6 +125,7 @@ def load_file(fn, raise_bad_format=False):
     # Determine if the file actually exists, and bail if not.
     secrets = {}
     if not Path(fn).is_file():
+        warnings.warn(f'File "{fn}" does not exist.')
         return secrets
 
     # Attempt to load TOML, since python.
