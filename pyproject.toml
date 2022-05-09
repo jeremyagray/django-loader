@@ -78,11 +78,12 @@ scopes = [
 ]
 
 footers = [
-  "signed-off-by"
+  "github-closes",
+  "signed-off-by",
 ]
 
 required_footers = [
-  "signed-off-by"
+  "signed-off-by",
 ]
 
 [tool.poetry]
