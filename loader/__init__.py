@@ -11,7 +11,6 @@
 """Loader module."""
 
 from .config import _create_argument_parser
-
 from .loader import _convert_dict_to_list
 from .loader import _convert_listdict_to_list
 from .loader import _keys_are_indices
