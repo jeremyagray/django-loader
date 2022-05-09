@@ -221,11 +221,13 @@ def test_load_file_valid_bespon(fs):
     fn = ".env"
     fs.create_file(fn)
     with open(fn, "w") as file:
-        file.write('SOME_VAR = "this is BespON"')
+        file.write("|=== one\ntwo = three\n|===/\n")
 
     actual = loader.load_file(fn)
     expected = {
-        "SOME_VAR": "this is BespON",
+        "one": {
+            "two": "three",
+        },
     }
 
     assert actual == expected

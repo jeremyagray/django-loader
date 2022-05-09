@@ -2,9 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# loader.py:  main loader functions
-#
-# Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright (C) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -28,6 +26,8 @@ import toml
 from django.core.exceptions import ImproperlyConfigured
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
+
+from .config import _create_argument_parser
 
 
 def generate_secret_key():
@@ -322,6 +322,86 @@ def dump_environment(config, prefix="DJANGO_ENV_", export=True):
     return "\n".join(f"{exp}{prefix}{line}" for line in dumps)
 
 
+def validate_file_format(fn):
+    """Validate format of ``fn``.
+
+    Validate that the file ``fn`` is in one of the recognized formats.
+    Return ``True`` if the format is valid and raises
+    ``ImproperlyConfigured`` if the file does not exist or does not
+    match a recognized format.
+
+    Parameters
+    ----------
+    fn : string
+        Filename from which to load configuration values.
+
+    Returns
+    -------
+    boolean
+        Returns ``True`` if the file's format is valid.
+
+    Raises
+    ------
+    django.core.exceptions.ImproperlyConfigured
+        Raises an ``ImproperlyConfigured`` exception if the file does
+        not exist or if the format is not recognized.
+    """
+    # Raise if the file does not exist.
+    if not Path(fn).is_file():
+        raise ImproperlyConfigured(f"Secrets file {Path(fn).resolve()} does not exist.")
+
+    # TOML.
+    with open(fn, "r") as f:
+        try:
+            toml.load(f)
+            print(f"Secrets file {Path(fn).resolve()} recognized as TOML.")
+            return True
+        except (toml.TomlDecodeError) as error:
+            print(f"toml error: {error}")
+            print(f"Secrets file {Path(fn).resolve()} not recognized as TOML.")
+            pass
+
+    # JSON.
+    with open(fn, "r") as f:
+        try:
+            json.load(f)
+            print(f"Secrets file {Path(fn).resolve()} recognized as JSON.")
+            return True
+        except (json.JSONDecodeError) as error:
+            print(f"json error: {error}")
+            print(f"Secrets file {Path(fn).resolve()} not recognized as JSON.")
+            pass
+
+    # YAML.
+    with open(fn, "r") as f:
+        try:
+            yaml = YAML(typ="safe")
+            yaml.load(f)
+            print(f"Secrets file {Path(fn).resolve()} recognized as YAML.")
+            return True
+        except (YAMLError) as error:
+            print(f"yaml error: {error}")
+            print(f"Secrets file {Path(fn).resolve()} not recognized as YAML.")
+            pass
+
+    # BespON.
+    with open(fn, "r") as f:
+        try:
+            bespon.load(f)
+            print(f"Secrets file {Path(fn).resolve()} recognized as BespON.")
+            return True
+        except (bespon.erring.DecodingException) as error:
+            print(f"bespon error: {error}")
+            print(f"Secrets file {Path(fn).resolve()} not recognized as BespON.")
+            pass
+
+    raise ImproperlyConfigured(
+        f"Configuration file {Path(fn).resolve()} is not a recognized format."
+    )
+
+    return False
+
+
 def validate_not_empty_string(name, val):
     """Validate that ``val`` is not an empty string.
 
@@ -486,15 +566,23 @@ def dump_secrets(fmt="TOML", **kwargs):
         return dump_environment(kwargs)
 
 
-def main():
+def main(argv=None):
     """Run as script, to access ``dump()`` functions."""
-    # Desired functions:
-    # create SECRET_KEY
-    # load and dump environment
-    # cli help
-    # cli copyright/license
-    print(dump_secrets(**load_secrets(**{"ALLOWED_HOSTS": ["bob is your uncle"]})))
+    args = _create_argument_parser().parse_args(argv)
 
-
-if __name__ == "__main__":
-    main()
+    # Generate a Django SECRET_KEY.
+    if args.generate_secret_key:
+        print(generate_secret_key())
+        sys.exit(0)
+    # Validate the secrets.
+    elif args.validate_secrets:
+        try:
+            # Validate the file format.
+            if validate_file_format(".env"):
+                sys.exit(0)
+        except (ImproperlyConfigured) as error:
+            print(error)
+            sys.exit(1)
+    # FIXME:  load and dump environment
+    else:
+        print(dump_secrets(**load_secrets(**{"ALLOWED_HOSTS": ["bob is your uncle"]})))
