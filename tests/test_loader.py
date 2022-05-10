@@ -23,12 +23,11 @@ import loader  # noqa: E402
 
 # loader.merge() tests.
 def test_merge_empty_defaults():
-    """Should return an empty dict with empty defaults."""
-    defaults = {}
+    """Should return all file and environment values."""
     file = {}
     env = {}
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader.merge({}, file, env)
     expected = {}
 
     assert actual == expected
@@ -38,8 +37,10 @@ def test_merge_empty_defaults():
     }
     env = {}
 
-    actual = loader.merge(defaults, file, env)
-    expected = {}
+    actual = loader.merge({}, file, env)
+    expected = {
+        "SOME_VAR": "test",
+    }
 
     assert actual == expected
 
@@ -48,8 +49,10 @@ def test_merge_empty_defaults():
         "SOME_VAR": "test",
     }
 
-    actual = loader.merge(defaults, file, env)
-    expected = {}
+    actual = loader.merge({}, file, env)
+    expected = {
+        "SOME_VAR": "test",
+    }
 
     assert actual == expected
 
@@ -60,8 +63,11 @@ def test_merge_empty_defaults():
         "OTHER_VAR": "test",
     }
 
-    actual = loader.merge(defaults, file, env)
-    expected = {}
+    actual = loader.merge({}, file, env)
+    expected = {
+        "SOME_VAR": "test",
+        "OTHER_VAR": "test",
+    }
 
     assert actual == expected
 
@@ -567,18 +573,18 @@ def test_dump_mixed(monkeypatch):
     monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__ORANGE", "5")
 
     expected = """export DJANGO_ENV_BREAKFAST='toast'
-export DJANGO_ENV_FRUITLIST_0='apple'
-export DJANGO_ENV_FRUITLIST_1='banana'
-export DJANGO_ENV_FRUITLIST_2='orange'
-export DJANGO_ENV_FRUIT_APPLE='2'
-export DJANGO_ENV_FRUIT_BANANA='3'
-export DJANGO_ENV_FRUIT_ORANGE='5'
-export DJANGO_ENV_FOOD_FRUITLIST_0='apple'
-export DJANGO_ENV_FOOD_FRUITLIST_1='banana'
-export DJANGO_ENV_FOOD_FRUITLIST_2='orange'
-export DJANGO_ENV_FOOD_FRUIT_APPLE='2'
-export DJANGO_ENV_FOOD_FRUIT_BANANA='3'
-export DJANGO_ENV_FOOD_FRUIT_ORANGE='5'"""
+export DJANGO_ENV_FRUITLIST__0='apple'
+export DJANGO_ENV_FRUITLIST__1='banana'
+export DJANGO_ENV_FRUITLIST__2='orange'
+export DJANGO_ENV_FRUIT__APPLE='2'
+export DJANGO_ENV_FRUIT__BANANA='3'
+export DJANGO_ENV_FRUIT__ORANGE='5'
+export DJANGO_ENV_FOOD__FRUITLIST__0='apple'
+export DJANGO_ENV_FOOD__FRUITLIST__1='banana'
+export DJANGO_ENV_FOOD__FRUITLIST__2='orange'
+export DJANGO_ENV_FOOD__FRUIT__APPLE='2'
+export DJANGO_ENV_FOOD__FRUIT__BANANA='3'
+export DJANGO_ENV_FOOD__FRUIT__ORANGE='5'"""
 
     actual = loader.dump_environment(loader.load_environment())
 
@@ -602,18 +608,18 @@ def test_dump_mixed_no_export(monkeypatch):
     monkeypatch.setenv("DJANGO_ENV_FOOD__FRUIT__ORANGE", "5")
 
     expected = """DJANGO_ENV_BREAKFAST='toast'
-DJANGO_ENV_FRUITLIST_0='apple'
-DJANGO_ENV_FRUITLIST_1='banana'
-DJANGO_ENV_FRUITLIST_2='orange'
-DJANGO_ENV_FRUIT_APPLE='2'
-DJANGO_ENV_FRUIT_BANANA='3'
-DJANGO_ENV_FRUIT_ORANGE='5'
-DJANGO_ENV_FOOD_FRUITLIST_0='apple'
-DJANGO_ENV_FOOD_FRUITLIST_1='banana'
-DJANGO_ENV_FOOD_FRUITLIST_2='orange'
-DJANGO_ENV_FOOD_FRUIT_APPLE='2'
-DJANGO_ENV_FOOD_FRUIT_BANANA='3'
-DJANGO_ENV_FOOD_FRUIT_ORANGE='5'"""
+DJANGO_ENV_FRUITLIST__0='apple'
+DJANGO_ENV_FRUITLIST__1='banana'
+DJANGO_ENV_FRUITLIST__2='orange'
+DJANGO_ENV_FRUIT__APPLE='2'
+DJANGO_ENV_FRUIT__BANANA='3'
+DJANGO_ENV_FRUIT__ORANGE='5'
+DJANGO_ENV_FOOD__FRUITLIST__0='apple'
+DJANGO_ENV_FOOD__FRUITLIST__1='banana'
+DJANGO_ENV_FOOD__FRUITLIST__2='orange'
+DJANGO_ENV_FOOD__FRUIT__APPLE='2'
+DJANGO_ENV_FOOD__FRUIT__BANANA='3'
+DJANGO_ENV_FOOD__FRUIT__ORANGE='5'"""
 
     actual = loader.dump_environment(loader.load_environment(), export=False)
 
@@ -741,7 +747,7 @@ def test_dump_secrets_json():
     }
 
     actual = loader.dump_secrets(fmt="JSON", **config)
-    expected = '{"SOME_VAR": "test"}'
+    expected = '{\n  "SOME_VAR": "test"\n}'
 
     assert actual == expected
 

@@ -49,6 +49,25 @@ to redistribute it under certain conditions; type ``loader.py
     )
 
     parser.add_argument(
+        "-p",
+        "--prefix",
+        dest="prefix",
+        type=str,
+        default="DJANGO_ENV_",
+        help="Environment variable prefix.",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--dump-format",
+        dest="dump",
+        type=str,
+        default="TOML",
+        choices=("TOML", "JSON", "YAML", "BespON", "ENV"),
+        help="Configuration dump format.",
+    )
+
+    parser.add_argument(
         "-V",
         "--validate-secrets",
         dest="validate_secrets",

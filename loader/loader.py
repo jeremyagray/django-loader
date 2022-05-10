@@ -81,15 +81,25 @@ def merge(defaults, file, env):
     """Merge configuration from defaults, file, and environment."""
     config = defaults
 
-    # Merge in file options, if they exist in the defaults.
-    for (k, v) in file.items():
-        if k in config:
-            config[k] = v
+    if defaults:
+        # Merge in file and environment options, if they exist in the
+        # defaults.
+        for (k, v) in file.items():
+            if k in config:
+                config[k] = v
 
-    # Merge in environment options, if they exist in the defaults.
+        for (k, v) in env.items():
+            if k in config:
+                config[k] = v
+
+        return config
+
+    # Merge all file and environment options, with no defaults.
+    for (k, v) in file.items():
+        config[k] = v
+
     for (k, v) in env.items():
-        if k in config:
-            config[k] = v
+        config[k] = v
 
     return config
 
@@ -135,15 +145,14 @@ def load_file(fn, raise_bad_format=True):
         try:
             secrets = toml.load(f)
             return secrets
-        except (toml.TomlDecodeError) as error:
-            print(f"toml error: {error}")
+        except (toml.TomlDecodeError):
+            pass
     # Attempt to load JSON.
     with open(fn, "r") as f:
         try:
             secrets = json.load(f)
             return secrets
-        except (json.JSONDecodeError) as error:
-            print(f"json error: {error}")
+        except (json.JSONDecodeError):
             pass
     # Attempt to load YAML, with ruamel.yaml and YAML 1.2.
     # Overachiever.
@@ -152,16 +161,14 @@ def load_file(fn, raise_bad_format=True):
             yaml = YAML(typ="safe")
             secrets = yaml.load(f)
             return secrets
-        except (YAMLError) as error:
-            print(f"yaml error: {error}")
+        except (YAMLError):
             pass
     # Attempt to load BespON.  Geek.
     with open(fn, "r") as f:
         try:
             secrets = bespon.load(f)
             return secrets
-        except (bespon.erring.DecodingException) as error:
-            print(f"bespon error: {error}")
+        except (bespon.erring.DecodingException):
             pass
 
     if raise_bad_format:
@@ -312,10 +319,10 @@ def dump_environment(config, prefix="DJANGO_ENV_", export=True):
         (k, v) = stack.pop(0)
         if isinstance(v, list):
             for (i, sv) in enumerate(v):
-                stack.append((f"{k}_{i}", sv))
+                stack.append((f"{k}__{i}", sv))
         elif isinstance(v, dict):
             for (sk, sv) in v.items():
-                stack.append((f"{k}_{sk}", sv))
+                stack.append((f"{k}__{sk}", sv))
         else:
             dumps.append(f"{str(k)}='{str(v)}'")
 
@@ -550,7 +557,7 @@ def dump_secrets(fmt="TOML", **kwargs):
     if fmt == "TOML":
         return toml.dumps(kwargs)
     elif fmt == "JSON":
-        return json.dumps(kwargs)
+        return json.dumps(kwargs, indent=2)
     elif fmt == "YAML":
         # Let's jump through some hoops for the sake of streams.
         # https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
@@ -587,9 +594,10 @@ def main(argv=None):
     else:
         print(
             dump_secrets(
+                fmt=args.dump,
                 **load_secrets(
                     fn=args.file,
-                    **{"ALLOWED_HOSTS": ["bob is your uncle"]},
-                )
+                    prefix=args.prefix,
+                ),
             )
         )
