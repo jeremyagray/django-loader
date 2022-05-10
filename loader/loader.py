@@ -578,11 +578,18 @@ def main(argv=None):
     elif args.validate_secrets:
         try:
             # Validate the file format.
-            if validate_file_format(".env"):
+            if validate_file_format(args.file):
                 sys.exit(0)
         except (ImproperlyConfigured) as error:
             print(error)
             sys.exit(1)
     # FIXME:  load and dump environment
     else:
-        print(dump_secrets(**load_secrets(**{"ALLOWED_HOSTS": ["bob is your uncle"]})))
+        print(
+            dump_secrets(
+                **load_secrets(
+                    fn=args.file,
+                    **{"ALLOWED_HOSTS": ["bob is your uncle"]},
+                )
+            )
+        )

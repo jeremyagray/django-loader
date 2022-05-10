@@ -37,11 +37,14 @@ Usage
 
 Console::
 
-    usage: loader.py [-h] [--show-warranty] [--show-license] [-V] [-g]
+    usage: loader.py [-h] [--show-warranty] [--show-license] [-V] [-g] [file]
 
     This program comes with ABSOLUTELY NO WARRANTY; for details type ``loader.py
     --show-warranty``. This is free software, and you are welcome to redistribute
     it under certain conditions; type ``loader.py --show-license`` for details.
+
+    positional arguments:
+      file                  Secrets file to be loaded; default is `.env`.
 
     options:
       -h, --help            show this help message and exit

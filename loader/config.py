@@ -27,6 +27,14 @@ to redistribute it under certain conditions; type ``loader.py
     )
 
     parser.add_argument(
+        dest="file",
+        type=str,
+        default=".env",
+        nargs="?",
+        help="Secrets file to be loaded; default is `.env`.",
+    )
+
+    parser.add_argument(
         "--show-warranty",
         nargs=0,
         action=_ShowLicenseAction,
