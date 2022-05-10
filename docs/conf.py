@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "django-loader"
 copyright = "2021-2022, Jeremy A Gray"
 author = "Jeremy A Gray"
-release = "0.0.9"
+release = "0.0.10"
 
 extensions = [
     "sphinx.ext.autodoc",
