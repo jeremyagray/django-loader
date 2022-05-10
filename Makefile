@@ -10,46 +10,62 @@
 #
 # ******************************************************************************
 
-.PHONY : build clean commit dist lint pip secret-key test test-all upload upload-test
+python-modules = fake loader tests
+python-files =
 
+.PHONY : test-all
 test-all:
 	pytest -vv --cov fake --cov loader --cov-report term --cov-report html
 
-build :
-	cd docs && make html
+.PHONY : build
+build : docs
 	pip install -q build
 	python -m build
 
+.PHONY : clean
 clean :
 	cd docs && make clean
 	rm -rf build
 	rm -rf dist
 	rm -rf django_loader.egg-info
 
+.PHONY : commit
 commit :
 	pre-commit run --all-files
 
+.PHONY : dist
 dist : clean build
 
-lint :
-	flake8 --exit-zero
-	isort --check . || exit 0
-	black --check .
+.PHONY : docs
+docs :
+	cd docs && make html
 
+.PHONY : lint
+lint :
+	flake8 --exit-zero $(python-modules) $(python-files)
+	isort --check $(python-modules) $(python-files) || exit 0
+	black --check $(python-modules) $(python-files)
+
+.PHONY : lint-fix
+lint-fix :
+	isort $(python-modules) $(python-files)
+	black $(python-modules) $(python-files)
+
+.PHONY : pip
 pip :
 	pip install -r requirements.txt
 
-secret-key :
-	python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key());"
-
+.PHONY : test
 test:
 	pytest
 
-requirements.txt: poetry.lock
-	./freeze.sh > $(@)
-
+.PHONY : upload
 upload:
 	python3 -m twine upload --verbose dist/*
 
+.PHONY : upload-test
 upload-test:
 	python3 -m twine upload --verbose --repository testpypi dist/*
+
+requirements.txt: poetry.lock
+	./freeze.sh > $(@)

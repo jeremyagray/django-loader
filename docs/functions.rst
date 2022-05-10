@@ -2,7 +2,7 @@
 ..
 .. django-loader, a configuration and secret loader for Django
 ..
-.. Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+.. Copyright (C) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
 ..
 .. SPDX-License-Identifier: MIT
 ..
@@ -17,6 +17,7 @@ Functions
 loader
 ------
 
+.. autofunction:: loader.dump_environment
 .. autofunction:: loader.dump_secrets
 .. autofunction:: loader.generate_secret_key
 .. autofunction:: loader.load_environment
@@ -25,5 +26,6 @@ loader
 .. autofunction:: loader.main
 .. autofunction:: loader.merge
 .. autofunction:: loader.validate_falsy
+.. autofunction:: loader.validate_file_format
 .. autofunction:: loader.validate_not_empty_string
 .. autofunction:: loader.validate_truthy

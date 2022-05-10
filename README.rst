@@ -17,21 +17,10 @@ What is django-loader?
 
 django-loader is a configuration variable and secrets loader for
 Django apps.  It loads a dictionary of configuration variables into
-``settings.py`` that consists of default values, values from a
-configuration file (like ``.env``) and from environment variables.  It
-can load configuration files in TOML, JSON, YAML, and BespON formats.
-The script interface is able to convert between all available formats.
-
-Roadmap
-=======
-
-#. Change from loading one configuration file to one or a list of
-   configuration files, with successive files having precedence over
-   previous ones.
-#. Implement validation functions to provide for customizable data
-   validation and security checks.
-#. Add simple command line interface options with ``argparse`` and add
-   usage to doumentation.
+``settings.py`` that consists of default values, values from a secrets
+file (defaults to ``.env``), and from environment variables.  It can
+load configuration files in TOML, JSON, YAML, and BespON formats and
+dump in any format, including as environment variables (Bourne shell).
 
 Installation
 ============
@@ -43,16 +32,25 @@ Install django-loader with::
 
 or add as a poetry dependency.
 
-If you desire a package locally built with poetry, download the
-source, change the appropriate lines in ``pyproject.toml``, and
-rebuild.
-
 Usage
 =====
 
 Console::
 
-  loader file format
+    usage: loader.py [-h] [--show-warranty] [--show-license] [-V] [-g]
+
+    This program comes with ABSOLUTELY NO WARRANTY; for details type ``loader.py
+    --show-warranty``. This is free software, and you are welcome to redistribute
+    it under certain conditions; type ``loader.py --show-license`` for details.
+
+    options:
+      -h, --help            show this help message and exit
+      --show-warranty       Show warranty information.
+      --show-license        Show license information.
+      -V, --validate-secrets
+                            Validate the secrets only.
+      -g, --generate-secret-key
+                            Generate a secret key.
 
 In Python::
 
@@ -64,22 +62,15 @@ See the source and `documentation
 <https://django-loader.readthedocs.io/en/latest/>`_ for more
 information.
 
-Configuration
-=============
-
-There are no configuration files or options; all configurable options
-will be accessible as function parameters or options in the command
-line interface.
-
 Copyright and License
 =====================
 
 SPDX-License-Identifier: `MIT <https://spdx.org/licenses/MTI.html>`_
 
-django-loader:  a configuration variable and secrets loader for Django
+django-loader: a configuration variable and secrets loader for Django
 apps.
 
-Copyright (C) 2021 `Jeremy A Gray <gray@flyquackswim.com>`_.
+Copyright (C) 2021-2022 `Jeremy A Gray <gray@flyquackswim.com>`_.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
