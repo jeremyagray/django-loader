@@ -20,11 +20,39 @@ build-backend = "setuptools.build_meta"
 
 [tool]
 
+[tool.bandit]
+
+# exclude = [
+#   "setup.py",
+# ]
+
+exclude_dirs = [
+  ".git",
+  ".pytest_cache",
+  ".tox",
+  ".venv",
+  "build",
+  "dist",
+  "htmlcov",
+  "django_loader.egg-info",
+  "htmlcov",
+]
+
+[tool.bandit.assert_used]
+
+skips = [
+  "**/test_*.py",
+]
+
 [tool.black]
 
 line-length = 88
-target-version = ['py38']
-include = '\.pyi?$'
+target-version = [
+  "py310",
+  "py311",
+  "py312",
+]
+include = "\\.pyi?$"
 exclude = '''
 (
   /(

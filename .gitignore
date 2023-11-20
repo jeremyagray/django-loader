@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -14,8 +14,11 @@
 
 # Python.
 .coverage
-.env
+.env*
+.pytest_cache
+.python-version
 .tox
+.venv
 __pycache__
 build
 dist
