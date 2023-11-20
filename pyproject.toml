@@ -119,7 +119,7 @@ required_footers = [
 authors = ["Jeremy A Gray <gray@flyquackswim.com>"]
 description = "django-loader:  a configuration and secret loader for Django"
 name = "django-loader"
-version = "0.0.10"
+version = "0.0.11"
 license = "MIT"
 maintainers = ["Jeremy A Gray <gray@flyquackswim.com>"]
 readme = "README.rst"
@@ -129,15 +129,13 @@ repository = "https://github.com/jeremyagray/django-loader"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
-  "Framework :: Django :: 2.2",
-  "Framework :: Django :: 3.2",
-  "Framework :: Django :: 4.0",
+  "Framework :: Django :: 4.2",
+  # "Framework :: Django :: 5.0",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Internet :: WWW/HTTP :: Site Management",
 ]
 

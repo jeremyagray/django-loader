@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright (C) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -16,9 +16,9 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "django-loader"
-copyright = "2021-2022, Jeremy A Gray"
+copyright = "2021-2023, Jeremy A Gray"
 author = "Jeremy A Gray"
-release = "0.0.10"
+release = "0.0.11"
 
 extensions = [
     "sphinx.ext.autodoc",
