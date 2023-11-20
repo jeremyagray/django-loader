@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -124,29 +124,29 @@ include = [
 
 [tool.poetry.dependencies]
 
-Django = "^2.2 || ^3.2 || ^4.0"
-bespon = "^0.6"
-python = ">3.7,<4.0"
-"ruamel.yaml" = "^0"
-toml = "^0"
+# Django = ">=4.2 || >=5.0"
+Django = ">=4.2,<5.0"
+bespon = ">=0"
+python = ">=3.10,<4.0"
+"ruamel.yaml" = ">=0"
+toml = ">=0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 
-Sphinx = "^4"
-black = { version = "*", allow-prereleases = true }
-coverage = {version = "^6", extras = ["toml"]}
-flake8 = "^4"
-flake8-docstrings = "^1"
-hypothesis = "^6"
-isort = "^5"
-pccc = "^0"
-pre-commit = "^2"
-pyfakefs = "^4"
-pytest = "^7"
-pytest-cov = "^3"
-pytest-django = "^4"
-tox = "^3"
-twine = "^4"
+Sphinx = ">=7"
+black = ">=23"
+coverage = {version = ">=7", extras = ["toml"]}
+flake8 = ">=6"
+flake8-docstrings = ">=1"
+hypothesis = ">=6"
+isort = ">=5"
+pccc = ">=0"
+pre-commit = ">=3"
+pyfakefs = ">=5"
+pytest = ">=7"
+pytest-cov = ">=4"
+pytest-django = ">=4"
+tox = ">=4"
 
 [tool.poetry.scripts]
 
