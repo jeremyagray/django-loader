@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright (C) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -17,7 +17,6 @@ order.
 import json
 import os
 import sys
-import types
 import warnings
 from pathlib import Path
 
@@ -84,21 +83,21 @@ def merge(defaults, file, env):
     if defaults:
         # Merge in file and environment options, if they exist in the
         # defaults.
-        for (k, v) in file.items():
+        for k, v in file.items():
             if k in config:
                 config[k] = v
 
-        for (k, v) in env.items():
+        for k, v in env.items():
             if k in config:
                 config[k] = v
 
         return config
 
     # Merge all file and environment options, with no defaults.
-    for (k, v) in file.items():
+    for k, v in file.items():
         config[k] = v
 
-    for (k, v) in env.items():
+    for k, v in env.items():
         config[k] = v
 
     return config
@@ -145,14 +144,14 @@ def load_file(fn, raise_bad_format=True):
         try:
             secrets = toml.load(f)
             return secrets
-        except (toml.TomlDecodeError):
+        except toml.TomlDecodeError:
             pass
     # Attempt to load JSON.
     with open(fn, "r") as f:
         try:
             secrets = json.load(f)
             return secrets
-        except (json.JSONDecodeError):
+        except json.JSONDecodeError:
             pass
     # Attempt to load YAML, with ruamel.yaml and YAML 1.2.
     # Overachiever.
@@ -161,14 +160,14 @@ def load_file(fn, raise_bad_format=True):
             yaml = YAML(typ="safe")
             secrets = yaml.load(f)
             return secrets
-        except (YAMLError):
+        except YAMLError:
             pass
     # Attempt to load BespON.  Geek.
     with open(fn, "r") as f:
         try:
             secrets = bespon.load(f)
             return secrets
-        except (bespon.erring.DecodingException):
+        except bespon.erring.DecodingException:
             pass
 
     if raise_bad_format:
@@ -186,7 +185,7 @@ def _keys_are_indices(d):
     for k in d.keys():
         try:
             keys.append(int(k))
-        except (ValueError):
+        except ValueError:
             return False
 
     keys = sorted(keys)
@@ -214,7 +213,7 @@ def _convert_dict_to_list(d):
 
 def _convert_listdict_to_list(ds):
     """Convert lists as dicts to lists in a data structure."""
-    for (k, v) in ds.items():
+    for k, v in ds.items():
         if isinstance(ds[k], dict):
             # If the item points a dict, descend.
             ds[k] = _convert_listdict_to_list(ds[k])
@@ -248,7 +247,7 @@ def load_environment(prefix="DJANGO_ENV_"):
     """
     config = {}
 
-    for (key, value) in os.environ.items():
+    for key, value in os.environ.items():
         if key.startswith(prefix):
             # Find the prefixed values and strip the prefix.
             if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
@@ -274,7 +273,7 @@ def load_environment(prefix="DJANGO_ENV_"):
                                 f"{k} is defined multiple times in the environment."
                             )
                         sub_config = sub_config[k]
-                    except (KeyError):
+                    except KeyError:
                         sub_config[k] = {}
                         sub_config = sub_config[k]
                 sub_config[keys[-1]] = value
@@ -312,16 +311,16 @@ def dump_environment(config, prefix="DJANGO_ENV_", export=True):
         exp = ""
 
     # Convert the config dict into a list (stack).
-    for (k, v) in config.items():
+    for k, v in config.items():
         stack.append((k, v))
 
     while stack:
         (k, v) = stack.pop(0)
         if isinstance(v, list):
-            for (i, sv) in enumerate(v):
+            for i, sv in enumerate(v):
                 stack.append((f"{k}__{i}", sv))
         elif isinstance(v, dict):
-            for (sk, sv) in v.items():
+            for sk, sv in v.items():
                 stack.append((f"{k}__{sk}", sv))
         else:
             dumps.append(f"{str(k)}='{str(v)}'")
@@ -363,7 +362,7 @@ def validate_file_format(fn):
             toml.load(f)
             print(f"Secrets file {Path(fn).resolve()} recognized as TOML.")
             return True
-        except (toml.TomlDecodeError) as error:
+        except toml.TomlDecodeError as error:
             print(f"toml error: {error}")
             print(f"Secrets file {Path(fn).resolve()} not recognized as TOML.")
             pass
@@ -374,7 +373,7 @@ def validate_file_format(fn):
             json.load(f)
             print(f"Secrets file {Path(fn).resolve()} recognized as JSON.")
             return True
-        except (json.JSONDecodeError) as error:
+        except json.JSONDecodeError as error:
             print(f"json error: {error}")
             print(f"Secrets file {Path(fn).resolve()} not recognized as JSON.")
             pass
@@ -386,7 +385,7 @@ def validate_file_format(fn):
             yaml.load(f)
             print(f"Secrets file {Path(fn).resolve()} recognized as YAML.")
             return True
-        except (YAMLError) as error:
+        except YAMLError as error:
             print(f"yaml error: {error}")
             print(f"Secrets file {Path(fn).resolve()} not recognized as YAML.")
             pass
@@ -397,7 +396,7 @@ def validate_file_format(fn):
             bespon.load(f)
             print(f"Secrets file {Path(fn).resolve()} recognized as BespON.")
             return True
-        except (bespon.erring.DecodingException) as error:
+        except bespon.erring.DecodingException as error:
             print(f"bespon error: {error}")
             print(f"Secrets file {Path(fn).resolve()} not recognized as BespON.")
             pass
@@ -587,7 +586,7 @@ def main(argv=None):
             # Validate the file format.
             if validate_file_format(args.file):
                 sys.exit(0)
-        except (ImproperlyConfigured) as error:
+        except ImproperlyConfigured as error:
             print(error)
             sys.exit(1)
     # FIXME:  load and dump environment

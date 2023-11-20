@@ -13,7 +13,6 @@
 import sys
 
 import pytest
-
 from django.core.exceptions import ImproperlyConfigured
 
 sys.path.insert(0, "/home/gray/src/work/django-loader")

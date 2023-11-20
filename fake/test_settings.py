@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -10,14 +10,7 @@
 #
 """Integration tests."""
 
-import sys
-
-import pytest
 from django.conf import settings
-
-sys.path.insert(0, "/home/gray/src/work/django-loader")
-
-import loader  # noqa: E402
 
 
 def test_load_secrets():

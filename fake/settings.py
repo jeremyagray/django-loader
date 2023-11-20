@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -12,14 +12,16 @@
 
 from pathlib import Path
 
-from django import VERSION
-
 import loader
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-1=-fer_+5!(w&hp_a2++9cl+q@k45y#)xtdnt0x-7xri*-gs0$"
+# Obviously not a real key.
+# FIXME:  should eat our own dog food and load this as necessary for tests.
+SECRET_KEY = (
+    "django-insecure-1=-fer_+5!(w&hp_a2++9cl+q@k45y#)xtdnt0x-7xri*-gs0$"  # nosec B105
+)
 DEBUG = True
 
 secrets = loader.load_secrets(
@@ -97,9 +99,6 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
-if VERSION < (4, 0, 0):
-    USE_L10N = True
 
 # Static files.
 STATIC_URL = "/static/"
