@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -10,21 +10,13 @@
 
 [build-system]
 
-# Setuptools.
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
 # Poetry.
-# requires = ["poetry_core>=1.0.0"]
-# build-backend = "poetry.core.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool]
 
 [tool.bandit]
-
-# exclude = [
-#   "setup.py",
-# ]
 
 exclude_dirs = [
   ".git",
@@ -47,11 +39,6 @@ skips = [
 [tool.black]
 
 line-length = 88
-target-version = [
-  "py310",
-  "py311",
-  "py312",
-]
 include = "\\.pyi?$"
 exclude = '''
 (
@@ -89,7 +76,7 @@ repair = false
 
 types = [
   "depends",
-  "docs",
+  "doc",
   "feat",
   "fix",
   "perf",
@@ -141,11 +128,6 @@ classifiers = [
 
 packages = [
   { include = "loader" },
-]
-
-include = [
-  "README.rst",
-  "docs/*.*",
 ]
 
 [tool.poetry.dependencies]
