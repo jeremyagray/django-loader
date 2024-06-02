@@ -104,7 +104,7 @@ required_footers = [
 [tool.poetry]
 
 authors = ["Jeremy A Gray <gray@flyquackswim.com>"]
-description = "django-loader:  a configuration and secret loader for Django"
+description = "a configuration and secret loader for Django"
 name = "django-loader"
 version = "0.0.11"
 license = "MIT"
@@ -116,8 +116,7 @@ repository = "https://github.com/jeremyagray/django-loader"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
-  "Framework :: Django :: 4.2",
-  # "Framework :: Django :: 5.0",
+  "Framework :: Django :: 5.0",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.10",
@@ -132,10 +131,9 @@ packages = [
 
 [tool.poetry.dependencies]
 
-# Django = ">=4.2 || >=5.0"
-Django = ">=4.2,<5.0"
+Django = ">=5.0,<5.1"
 bespon = ">=0"
-python = ">=3.10,<4.0"
+python = ">=3.10.1,<4.0"
 "ruamel.yaml" = ">=0"
 toml = ">=0"
 
