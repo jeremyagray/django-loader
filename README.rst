@@ -1,3 +1,13 @@
+.. *****************************************************************************
+..
+.. django-loader, a configuration and secret loader for Django
+..
+.. Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
+..
+.. SPDX-License-Identifier: MIT
+..
+.. *****************************************************************************
+
 ===============
  django-loader
 ===============
@@ -28,9 +38,10 @@ Installation
 Install django-loader with::
 
   pip install django-loader
-  pip freeze > requirements.txt
 
-or add as a poetry dependency.
+or::
+
+  poetry add django-loader
 
 Usage
 =====
@@ -79,7 +90,7 @@ SPDX-License-Identifier: `MIT <https://spdx.org/licenses/MTI.html>`_
 django-loader: a configuration variable and secrets loader for Django
 apps.
 
-Copyright (C) 2021-2022 `Jeremy A Gray <gray@flyquackswim.com>`_.
+Copyright (C) 2021-2024 `Jeremy A Gray <gray@flyquackswim.com>`_.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

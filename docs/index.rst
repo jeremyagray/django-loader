@@ -2,14 +2,15 @@
 ..
 .. django-loader, a configuration and secret loader for Django
 ..
-.. Copyright (C) 2021 Jeremy A Gray <gray@flyquackswim.com>.
+.. Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 ..
 .. SPDX-License-Identifier: MIT
 ..
 .. *****************************************************************************
 
-django-loader Documentation
-===========================
+=============================
+ django-loader Documentation
+=============================
 
 .. toctree::
    :maxdepth: 3

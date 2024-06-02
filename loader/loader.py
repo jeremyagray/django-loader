@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -56,15 +56,15 @@ def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
 
     Parameters
     ----------
-    fn : string, default=".env"
+    fn : str, optional
         Configuration filename, defaults to ``.env``.  May be in TOML,
         JSON, YAML, or BespON formats.  Formats will be attempted in this
         order.
-    prefix : string, default="DJANGO_ENV_"
+    prefix : str, optional
         Prefix for environment variables.  This prefix will be
         prepended to all variable names before searching for them in
         the environment.
-    kwargs : dict, optional
+    **kwargs : dict, optional
         Dictionary with configuration variables as keys and default
         values as values.
 
@@ -77,7 +77,22 @@ def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
 
 
 def merge(defaults, file, env):
-    """Merge configuration from defaults, file, and environment."""
+    """Merge configuration from defaults, file, and environment.
+
+    Parameters
+    ----------
+    defaults : dict
+        Default configuration dictionary.
+    file : dict
+        File configuration dictionary.
+    env : dict
+        Environment configuration dictionary.
+
+    Returns
+    -------
+    dict
+        A dictionary of configuration variables and their values.
+    """
     config = defaults
 
     if defaults:
@@ -114,9 +129,9 @@ def load_file(fn, raise_bad_format=True):
 
     Parameters
     ----------
-    fn : string
+    fn : str
         Filename from which to load configuration values.
-    raise_bad_format : boolean, default=True
+    raise_bad_format : bool, optional
         Determine whether to raise
         ``django.core.exceptions.ImproperlyConfigured`` if the file
         format is not recognized.  Default is ``True``.
@@ -179,7 +194,19 @@ def load_file(fn, raise_bad_format=True):
 
 
 def _keys_are_indices(d):
-    """Determine if the keys of a dict are list indices."""
+    """Determine if the keys of a dict are list indices.
+
+    Parameters
+    ----------
+    d : dict
+        A dictionary that may only have list indices as keys.
+
+    Returns
+    -------
+    bool
+        ``True`` if all keys of a dict are list indices, ``False``
+        otherwise.
+    """
     # All integers?
     keys = []
     for k in d.keys():
@@ -202,7 +229,18 @@ def _keys_are_indices(d):
 
 
 def _convert_dict_to_list(d):
-    """Convert a list-style dict to a list."""
+    """Convert a list-style dict to a list.
+
+    Parameters
+    ----------
+    d : dict
+        A dictionary with list indices as keys.
+
+    Returns
+    -------
+    list
+        The index-sorted values of the provided dictionary.
+    """
     keys = sorted(d.keys())
     the_list = []
     for k in keys:
@@ -211,18 +249,32 @@ def _convert_dict_to_list(d):
     return the_list
 
 
-def _convert_listdict_to_list(ds):
-    """Convert lists as dicts to lists in a data structure."""
-    for k, v in ds.items():
-        if isinstance(ds[k], dict):
+def _convert_listdict_to_list(d):
+    """Convert lists as dicts to lists in a data structure.
+
+    Convert lists as dicts to lists in a data structure that may
+    contain lists of dicts or dicts of dicts, descending as necessary.
+
+    Parameters
+    ----------
+    d : dict
+        A dictionary, possibly containing other data structures.
+
+    Returns
+    -------
+    list
+        The index-sorted values of the provided dictionary.
+    """
+    for k, v in d.items():
+        if isinstance(d[k], dict):
             # If the item points a dict, descend.
-            ds[k] = _convert_listdict_to_list(ds[k])
+            d[k] = _convert_listdict_to_list(d[k])
             # We're back.  Now check if the dict is a list-style dict
             # and maybe convert to a list.
-            if _keys_are_indices(ds[k]):
-                ds[k] = _convert_dict_to_list(ds[k])
+            if _keys_are_indices(d[k]):
+                d[k] = _convert_dict_to_list(d[k])
 
-    return ds
+    return d
 
 
 def load_environment(prefix="DJANGO_ENV_"):
@@ -235,7 +287,7 @@ def load_environment(prefix="DJANGO_ENV_"):
 
     Parameters
     ----------
-    prefix : string, default="DJANGO_ENV_"
+    prefix : str, optional
         Prefix for environment variables.  This prefix should be
         prepended to all valid variable names in the environment.
 
@@ -290,10 +342,10 @@ def dump_environment(config, prefix="DJANGO_ENV_", export=True):
     ----------
     config : dict
         The configuration dict.
-    prefix : string, default="DJANGO_ENV_"
+    prefix : str, optional
         Prefix for environment variables.  This prefix should be
         prepended to all valid variable names in the environment.
-    export : boolean, default=True
+    export : bool, optional
         Prepend each environment variable string with "export ", or
         not.
 
@@ -338,12 +390,12 @@ def validate_file_format(fn):
 
     Parameters
     ----------
-    fn : string
+    fn : str
         Filename from which to load configuration values.
 
     Returns
     -------
-    boolean
+    bool
         Returns ``True`` if the file's format is valid.
 
     Raises
@@ -415,13 +467,14 @@ def validate_not_empty_string(name, val):
 
     Parameters
     ----------
-    val : any
+    val : obj
         Configuration variable to validate.
 
     Returns
     -------
-    boolean
-        ``True`` if ``val`` is not an empty string.
+    bool
+        ``True`` if ``val`` is not an empty string, ``False``
+        otherwise.
 
     Raises
     ------
@@ -443,13 +496,13 @@ def validate_falsy(name, val):
 
     Parameters
     ----------
-    val : any
+    val
         Configuration variable to validate.
 
     Returns
     -------
-    boolean
-        ``True`` if ``val`` is falsy.
+    bool
+        ``True`` if ``val`` is falsy, ``False`` otherwise.
 
     Raises
     ------
@@ -473,13 +526,13 @@ def validate_truthy(name, val):
 
     Parameters
     ----------
-    val : any
+    val
         Configuration variable to validate.
 
     Returns
     -------
-    boolean
-        ``True`` if ``val`` is truthy.
+    bool
+        ``True`` if ``val`` is truthy, ``False`` otherwise.
 
     Raises
     ------
@@ -547,10 +600,10 @@ def dump_secrets(fmt="TOML", **kwargs):
 
     Parameters
     ----------
-    fmt : string, default="TOML"
+    fmt : str, optional
         The dump format, one of ``TOML``, ``JSON``, ``YAML``,
         ``BespON``, or ``ENV``.
-    kwargs : dict
+    **kwargs : dict
         A dictionary of configuration variables.
     """
     if fmt == "TOML":
@@ -573,7 +626,13 @@ def dump_secrets(fmt="TOML", **kwargs):
 
 
 def main(argv=None):
-    """Run as script, to access ``dump()`` functions."""
+    """Provide the executable interface to django-loader.
+
+    Parameters
+    ----------
+    argv : list, optional
+        A list of arguments for the ``argparse`` parser.
+    """
     args = _create_argument_parser().parse_args(argv)
 
     # Generate a Django SECRET_KEY.

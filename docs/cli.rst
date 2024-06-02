@@ -2,14 +2,17 @@
 ..
 .. django-loader, a configuration and secret loader for Django
 ..
-.. Copyright (C) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+.. Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 ..
 .. SPDX-License-Identifier: MIT
 ..
 .. *****************************************************************************
 
-CLI Arguments
-=============
+===============
+ CLI Arguments
+===============
+
+Command line help::
 
     usage: loader.py [-h] [--show-warranty] [--show-license] [-p PREFIX]
                      [-d {TOML,JSON,YAML,BespON,ENV}] [-V] [-g]
