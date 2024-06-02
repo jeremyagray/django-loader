@@ -139,18 +139,11 @@ toml = ">=0"
 
 [tool.poetry.group.dev.dependencies]
 
-Sphinx = ">=7"
-black = ">=23"
-coverage = {version = ">=7", extras = ["toml"]}
-flake8 = ">=6"
-flake8-docstrings = ">=1"
 hypothesis = ">=6"
-isort = ">=5"
 pccc = ">=0"
 pre-commit = ">=3"
 pyfakefs = ">=5"
-pytest = ">=7"
-pytest-cov = ">=4"
+pytest = ">=8"
 pytest-django = ">=4"
 tox = ">=4"
 
