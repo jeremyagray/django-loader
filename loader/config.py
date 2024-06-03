@@ -2,13 +2,13 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
 # ******************************************************************************
-#
-"""django-loader command-line options."""
+
+"""django-loader command-line option parser."""
 
 import argparse
 import sys
@@ -69,11 +69,11 @@ to redistribute it under certain conditions; type ``loader.py
 
     parser.add_argument(
         "-V",
-        "--validate-secrets",
+        "--validate-secrets-format",
         dest="validate_secrets",
         default=False,
         action="store_true",
-        help="Validate the secrets only.",
+        help="Validate the secrets file format.",
     )
 
     parser.add_argument(
@@ -95,7 +95,7 @@ django-loader, a configuration and secret loader for Django
 
 MIT License
 
-Copyright (c) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+Copyright (c) 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

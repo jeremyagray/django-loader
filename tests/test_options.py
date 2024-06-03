@@ -8,7 +8,7 @@
 #
 # ******************************************************************************
 
-"""loader.py options tests."""
+"""django-loader command line options tests."""
 
 import pytest
 
@@ -66,7 +66,7 @@ django-loader, a configuration and secret loader for Django
 
 MIT License
 
-Copyright (c) 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+Copyright (c) 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

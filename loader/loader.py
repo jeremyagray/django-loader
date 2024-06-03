@@ -29,6 +29,42 @@ from ruamel.yaml.error import YAMLError
 from .config import _create_argument_parser
 
 
+def main(argv=None):
+    """Provide the executable interface to django-loader.
+
+    Parameters
+    ----------
+    argv : list, optional
+        A list of arguments for the ``argparse`` parser.
+    """
+    args = _create_argument_parser().parse_args(argv)
+
+    # Generate a Django SECRET_KEY.
+    if args.generate_secret_key:
+        print(generate_secret_key())
+        sys.exit(0)
+    # Validate the secrets.
+    elif args.validate_secrets:
+        try:
+            # Validate the file format.
+            if _validate_file_format(args.file):
+                sys.exit(0)
+        except ImproperlyConfigured as error:
+            print(error)
+            sys.exit(1)
+    # FIXME:  load and dump environment
+    else:
+        print(
+            dump_secrets(
+                fmt=args.dump,
+                **load_secrets(
+                    fn=args.file,
+                    prefix=args.prefix,
+                ),
+            )
+        )
+
+
 def generate_secret_key():
     """Generate a secret key for a Django app.
 
@@ -53,10 +89,8 @@ def load_secrets(
     """Load a list of configuration variables.
 
     Return a dictionary of configuration variables, as loaded from a
-    configuration file or the environment.  Values passed in as
-    ``args`` or as the value in ``kwargs`` will be used as the
-    configuration variable's default value if one is not found in the
-    configuration file or environment.
+    configuration file or the environment.  Default key/value pairs
+    may be passed as ``kwargs``.
 
     Parameters
     ----------
@@ -81,52 +115,101 @@ def load_secrets(
     if fn is None:
         fn = os.getenv("DJANGO_LOADER_ENV_FILE", ".env")
 
-    return merge(kwargs, load_file(fn), load_environment(prefix))
+    return _merge(kwargs, _load_secrets_file(fn), _load_secrets_environment(prefix))
 
 
-def merge(defaults, file, env):
-    """Merge configuration from defaults, file, and environment.
+def dump_secrets(fmt="TOML", **kwargs):
+    """Dump a secrets dictionary to the specified format.
+
+    Dump a secrets dictionary to the specified format, defaulting to
+    TOML.
 
     Parameters
     ----------
-    defaults : dict
-        Default configuration dictionary.
-    file : dict
-        File configuration dictionary.
-    env : dict
-        Environment configuration dictionary.
+    fmt : str, optional
+        The dump format, one of ``TOML``, ``JSON``, ``YAML``,
+        ``BespON``, or ``ENV``.
+    **kwargs : dict
+        A dictionary of configuration variables.
+    """
+    if fmt == "TOML":
+        return toml.dumps(kwargs)
+    elif fmt == "JSON":
+        return json.dumps(kwargs, indent=2)
+    elif fmt == "YAML":
+        # Let's jump through some hoops for the sake of streams.
+        # https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
+        from ruamel.yaml.compat import StringIO
+
+        stream = StringIO()
+        yaml = YAML(typ="safe")
+        yaml.dump(kwargs, stream)
+        return stream.getvalue()
+    elif fmt == "BespON":
+        return bespon.dumps(kwargs)
+    else:
+        return _dump_secrets_environment(kwargs)
+
+
+def _load_secrets_environment(prefix="DJANGO_ENV_"):
+    """Load Django configuration variables from the enviroment.
+
+    This function searches the environment for variables prepended
+    with ``prefix``.  Currently, this function only reliably works for
+    string variables, but hopefully will work for other types,
+    dictionaries, and lists in the future.
+
+    Parameters
+    ----------
+    prefix : str, optional
+        Prefix for environment variables.  This prefix should be
+        prepended to all valid variable names in the environment.
 
     Returns
     -------
     dict
-        A dictionary of configuration variables and their values.
+        A dictionary, possibly empty, of configuration variables and
+        values.
     """
-    config = defaults
+    config = {}
 
-    if defaults:
-        # Merge in file and environment options, if they exist in the
-        # defaults.
-        for k, v in file.items():
-            if k in config:
-                config[k] = v
+    for key, value in os.environ.items():
+        if key.startswith(prefix):
+            # Find the prefixed values and strip the prefix.
+            if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
+                name = key[len(prefix) :]
+            else:
+                name = key.removeprefix(prefix)
 
-        for k, v in env.items():
-            if k in config:
-                config[k] = v
+            if "__" not in name:
+                # Find the non-dict and non-list pairs and add them to
+                # the dict.
+                config[name] = value
+            else:
+                # Handle the flattened data structures, treating the
+                # list type variables as dicts.
+                # Based on:
+                # https://gist.github.com/fmder/494aaa2dd6f8c428cede
+                keys = name.split("__")
+                sub_config = config
+                for k in keys[:-1]:
+                    try:
+                        if not isinstance(sub_config[k], dict):
+                            raise ImproperlyConfigured(
+                                f"{k} is defined multiple times in the environment."
+                            )
+                        sub_config = sub_config[k]
+                    except KeyError:
+                        sub_config[k] = {}
+                        sub_config = sub_config[k]
+                sub_config[keys[-1]] = value
 
-        return config
-
-    # Merge all file and environment options, with no defaults.
-    for k, v in file.items():
-        config[k] = v
-
-    for k, v in env.items():
-        config[k] = v
+    config = _convert_listdict_to_list(config)
 
     return config
 
 
-def load_file(fn, raise_bad_format=True):
+def _load_secrets_file(fn, raise_bad_format=True):
     """Attempt to load configuration variables from ``fn``.
 
     Attempt to load configuration variables from ``fn``.  If ``fn``
@@ -199,6 +282,96 @@ def load_file(fn, raise_bad_format=True):
         )
 
     return secrets
+
+
+def _dump_secrets_environment(config, prefix="DJANGO_ENV_", export=True):
+    """Dump configuration as an environment variable string.
+
+    Dump configuration as an environment variable string, hopefully
+    compatible with Bourne shells.  Tested exclusively with bash.
+
+    Parameters
+    ----------
+    config : dict
+        The configuration dict.
+    prefix : str, optional
+        Prefix for environment variables.  This prefix should be
+        prepended to all valid variable names in the environment.
+    export : bool, optional
+        Prepend each environment variable string with "export ", or
+        not.
+
+    Returns
+    -------
+    string
+        The current configuration as a string setting environment
+        variables.
+    """
+    stack = []
+    dumps = []
+    if export:
+        exp = "export "
+    else:
+        exp = ""
+
+    # Convert the config dict into a list (stack).
+    for k, v in config.items():
+        stack.append((k, v))
+
+    while stack:
+        (k, v) = stack.pop(0)
+        if isinstance(v, list):
+            for i, sv in enumerate(v):
+                stack.append((f"{k}__{i}", sv))
+        elif isinstance(v, dict):
+            for sk, sv in v.items():
+                stack.append((f"{k}__{sk}", sv))
+        else:
+            dumps.append(f"{str(k)}='{str(v)}'")
+
+    return "\n".join(f"{exp}{prefix}{line}" for line in dumps)
+
+
+def _merge(defaults, file, env):
+    """Merge configuration from defaults, file, and environment.
+
+    Parameters
+    ----------
+    defaults : dict
+        Default configuration dictionary.
+    file : dict
+        File configuration dictionary.
+    env : dict
+        Environment configuration dictionary.
+
+    Returns
+    -------
+    dict
+        A dictionary of configuration variables and their values.
+    """
+    config = defaults
+
+    if defaults:
+        # Merge in file and environment options, if they exist in the
+        # defaults.
+        for k, v in file.items():
+            if k in config:
+                config[k] = v
+
+        for k, v in env.items():
+            if k in config:
+                config[k] = v
+
+        return config
+
+    # Merge all file and environment options, with no defaults.
+    for k, v in file.items():
+        config[k] = v
+
+    for k, v in env.items():
+        config[k] = v
+
+    return config
 
 
 def _keys_are_indices(d):
@@ -285,110 +458,7 @@ def _convert_listdict_to_list(d):
     return d
 
 
-def load_environment(prefix="DJANGO_ENV_"):
-    """Load Django configuration variables from the enviroment.
-
-    This function searches the environment for variables prepended
-    with ``prefix``.  Currently, this function only reliably works for
-    string variables, but hopefully will work for other types,
-    dictionaries, and lists in the future.
-
-    Parameters
-    ----------
-    prefix : str, optional
-        Prefix for environment variables.  This prefix should be
-        prepended to all valid variable names in the environment.
-
-    Returns
-    -------
-    dict
-        A dictionary, possibly empty, of configuration variables and
-        values.
-    """
-    config = {}
-
-    for key, value in os.environ.items():
-        if key.startswith(prefix):
-            # Find the prefixed values and strip the prefix.
-            if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
-                name = key[len(prefix) :]
-            else:
-                name = key.removeprefix(prefix)
-
-            if "__" not in name:
-                # Find the non-dict and non-list pairs and add them to
-                # the dict.
-                config[name] = value
-            else:
-                # Handle the flattened data structures, treating the
-                # list type variables as dicts.
-                # Based on:
-                # https://gist.github.com/fmder/494aaa2dd6f8c428cede
-                keys = name.split("__")
-                sub_config = config
-                for k in keys[:-1]:
-                    try:
-                        if not isinstance(sub_config[k], dict):
-                            raise ImproperlyConfigured(
-                                f"{k} is defined multiple times in the environment."
-                            )
-                        sub_config = sub_config[k]
-                    except KeyError:
-                        sub_config[k] = {}
-                        sub_config = sub_config[k]
-                sub_config[keys[-1]] = value
-
-    config = _convert_listdict_to_list(config)
-
-    return config
-
-
-def dump_environment(config, prefix="DJANGO_ENV_", export=True):
-    """Dump configuration as an environment variable string.
-
-    Parameters
-    ----------
-    config : dict
-        The configuration dict.
-    prefix : str, optional
-        Prefix for environment variables.  This prefix should be
-        prepended to all valid variable names in the environment.
-    export : bool, optional
-        Prepend each environment variable string with "export ", or
-        not.
-
-    Returns
-    -------
-    string
-        The current configuration as a string setting environment
-        variables.
-    """
-    stack = []
-    dumps = []
-    if export:
-        exp = "export "
-    else:
-        exp = ""
-
-    # Convert the config dict into a list (stack).
-    for k, v in config.items():
-        stack.append((k, v))
-
-    while stack:
-        (k, v) = stack.pop(0)
-        if isinstance(v, list):
-            for i, sv in enumerate(v):
-                stack.append((f"{k}__{i}", sv))
-        elif isinstance(v, dict):
-            for sk, sv in v.items():
-                stack.append((f"{k}__{sk}", sv))
-        else:
-            dumps.append(f"{str(k)}='{str(v)}'")
-
-    return "\n".join(f"{exp}{prefix}{line}" for line in dumps)
-
-
-def validate_file_format(fn):
+def _validate_file_format(fn):
     """Validate format of ``fn``.
 
     Validate that the file ``fn`` is in one of the recognized formats.
@@ -466,204 +536,3 @@ def validate_file_format(fn):
     )
 
     return False
-
-
-def validate_not_empty_string(name, val):
-    """Validate that ``val`` is not an empty string.
-
-    Validate that ``val`` is not an empty string.
-
-    Parameters
-    ----------
-    val : obj
-        Configuration variable to validate.
-
-    Returns
-    -------
-    bool
-        ``True`` if ``val`` is not an empty string, ``False``
-        otherwise.
-
-    Raises
-    ------
-    django.core.exceptions.ImproperlyConfigured
-        Raises an ``ImproperlyConfigured`` exception on empty strings,
-        with an error message.
-    """
-    if val == "":
-        raise ImproperlyConfigured(f"{name} is an empty string and should not be")
-
-    return True
-
-
-def validate_falsy(name, val):
-    """Validate that ``val`` is falsy.
-
-    Validate that ``val`` is falsy according to
-    https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
-
-    Parameters
-    ----------
-    val
-        Configuration variable to validate.
-
-    Returns
-    -------
-    bool
-        ``True`` if ``val`` is falsy, ``False`` otherwise.
-
-    Raises
-    ------
-    django.core.exceptions.ImproperlyConfigured
-        Raises an ``ImproperlyConfigured`` exception on truthy values,
-        with an error message.
-    """
-    if val:
-        raise ImproperlyConfigured(
-            f"{name} has value {val} which is truthy, but should be falsy"
-        )
-
-    return True
-
-
-def validate_truthy(name, val):
-    """Validate that ``val`` is truthy.
-
-    Validate that ``val`` is truthy according to
-    https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
-
-    Parameters
-    ----------
-    val
-        Configuration variable to validate.
-
-    Returns
-    -------
-    bool
-        ``True`` if ``val`` is truthy, ``False`` otherwise.
-
-    Raises
-    ------
-    django.core.exceptions.ImproperlyConfigured
-        Raises an ``ImproperlyConfigured`` exception on falsy values,
-        with an error message.
-    """
-    if not val:
-        raise ImproperlyConfigured(
-            f"{name} has value {val} which is falsy, but should be truthy"
-        )
-
-    return True
-
-
-# def set_or_fail_on_unset(val):
-#     """Raise ``ImproperlyConfigured()`` if ``val`` is not set.
-
-#     Return the configuration value if set, otherwise raise
-#     ``django.core.exceptions.ImproperlyConfigured()`` to abort.
-
-#     Parameters
-#     ----------
-#     val : string
-#         Configuration variable that should be set to a value.
-
-#     Returns
-#     -------
-#     string
-#         The variable value, if set.
-#     """
-#     if not val:
-#         raise ImproperlyConfigured("A required configuration variable is not set.")
-
-#     return val
-
-
-# def _validate(name, val, validation=[]):
-#     """Validate a django configuration variable."""
-#     env_name = "DJANGO_" + name
-
-#     if isinstance(validation, types.FunctionType):
-#         try:
-#             return validation(val)
-#         except ImproperlyConfigured:
-#             raise
-#     else:
-#         if len(validation) > 0:
-#             if not (val in validation):
-#                 raise ImproperlyConfigured(
-#                     f"{name} can not have value {val};"
-#                     f" must be one of [{', '.join(validation)}]."
-#                 )
-#                 return
-
-#         print(f"{name} loaded from {env_name}.")
-#         return val
-
-
-def dump_secrets(fmt="TOML", **kwargs):
-    """Dump a secrets dictionary to the specified format.
-
-    Dump a secrets dictionary to the specified format, defaulting to
-    TOML.
-
-    Parameters
-    ----------
-    fmt : str, optional
-        The dump format, one of ``TOML``, ``JSON``, ``YAML``,
-        ``BespON``, or ``ENV``.
-    **kwargs : dict
-        A dictionary of configuration variables.
-    """
-    if fmt == "TOML":
-        return toml.dumps(kwargs)
-    elif fmt == "JSON":
-        return json.dumps(kwargs, indent=2)
-    elif fmt == "YAML":
-        # Let's jump through some hoops for the sake of streams.
-        # https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
-        from ruamel.yaml.compat import StringIO
-
-        stream = StringIO()
-        yaml = YAML(typ="safe")
-        yaml.dump(kwargs, stream)
-        return stream.getvalue()
-    elif fmt == "BespON":
-        return bespon.dumps(kwargs)
-    else:
-        return dump_environment(kwargs)
-
-
-def main(argv=None):
-    """Provide the executable interface to django-loader.
-
-    Parameters
-    ----------
-    argv : list, optional
-        A list of arguments for the ``argparse`` parser.
-    """
-    args = _create_argument_parser().parse_args(argv)
-
-    # Generate a Django SECRET_KEY.
-    if args.generate_secret_key:
-        print(generate_secret_key())
-        sys.exit(0)
-    # Validate the secrets.
-    elif args.validate_secrets:
-        try:
-            # Validate the file format.
-            if validate_file_format(args.file):
-                sys.exit(0)
-        except ImproperlyConfigured as error:
-            print(error)
-            sys.exit(1)
-    # FIXME:  load and dump environment
-    else:
-        print(
-            dump_secrets(
-                fmt=args.dump,
-                **load_secrets(
-                    fn=args.file,
-                    prefix=args.prefix,
-                ),
-            )
-        )

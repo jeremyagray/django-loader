@@ -17,6 +17,7 @@
    :caption: Contents:
 
    ../readme
+   ../format
    ../functions
    ../cli
    ../license

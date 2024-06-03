@@ -32,6 +32,9 @@ file (defaults to ``.env``), and from environment variables.  It can
 load configuration files in TOML, JSON, YAML, and BespON formats and
 dump in any format, including as environment variables (Bourne shell).
 
+See the environment variable format specification for more details
+about passing environment variables.
+
 Installation
 ============
 
@@ -45,34 +48,6 @@ or::
 
 Usage
 =====
-
-Console::
-
-    usage: loader.py [-h] [--show-warranty] [--show-license] [-p PREFIX]
-                     [-d {TOML,JSON,YAML,BespON,ENV}] [-V] [-g]
-                     [file]
-
-    This program comes with ABSOLUTELY NO WARRANTY; for details type ``loader.py
-    --show-warranty``. This is free software, and you are welcome to redistribute
-    it under certain conditions; type ``loader.py --show-license`` for details.
-
-    positional arguments:
-      file                  Secrets file to be loaded; default is `.env`.
-
-    options:
-      -h, --help            show this help message and exit
-      --show-warranty       Show warranty information.
-      --show-license        Show license information.
-      -p PREFIX, --prefix PREFIX
-                            Environment variable prefix.
-      -d {TOML,JSON,YAML,BespON,ENV}, --dump-format {TOML,JSON,YAML,BespON,ENV}
-                            Configuration dump format.
-      -V, --validate-secrets
-                            Validate the secrets only.
-      -g, --generate-secret-key
-                            Generate a secret key.
-
-In Python::
 
   >>> import loader
   >>> secrets = loader.load_secrets(**{"SECRET_KEY": ""})

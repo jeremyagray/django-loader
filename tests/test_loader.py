@@ -16,13 +16,12 @@ from django.core.exceptions import ImproperlyConfigured
 import loader
 
 
-# loader.merge() tests.
-def test_merge_empty_defaults():
+def test__merge_empty_defaults():
     """Should return all file and environment values."""
     file = {}
     env = {}
 
-    actual = loader.merge({}, file, env)
+    actual = loader._merge({}, file, env)
     expected = {}
 
     assert actual == expected
@@ -32,7 +31,7 @@ def test_merge_empty_defaults():
     }
     env = {}
 
-    actual = loader.merge({}, file, env)
+    actual = loader._merge({}, file, env)
     expected = {
         "SOME_VAR": "test",
     }
@@ -44,7 +43,7 @@ def test_merge_empty_defaults():
         "SOME_VAR": "test",
     }
 
-    actual = loader.merge({}, file, env)
+    actual = loader._merge({}, file, env)
     expected = {
         "SOME_VAR": "test",
     }
@@ -58,7 +57,7 @@ def test_merge_empty_defaults():
         "OTHER_VAR": "test",
     }
 
-    actual = loader.merge({}, file, env)
+    actual = loader._merge({}, file, env)
     expected = {
         "SOME_VAR": "test",
         "OTHER_VAR": "test",
@@ -67,7 +66,7 @@ def test_merge_empty_defaults():
     assert actual == expected
 
 
-def test_merge_one_default():
+def test__merge_one_default():
     """Should return a single entry dict."""
     defaults = {
         "SOME_VAR": "defaults",
@@ -75,7 +74,7 @@ def test_merge_one_default():
     file = {}
     env = {}
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader._merge(defaults, file, env)
     expected = defaults
 
     assert actual == expected
@@ -85,7 +84,7 @@ def test_merge_one_default():
     }
     env = {}
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader._merge(defaults, file, env)
     expected = file
 
     assert actual == expected
@@ -94,7 +93,7 @@ def test_merge_one_default():
         "SOME_VAR": "env",
     }
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader._merge(defaults, file, env)
     expected = env
 
     assert actual == expected
@@ -106,7 +105,7 @@ def test_merge_one_default():
         "OTHER_VAR": "env",
     }
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader._merge(defaults, file, env)
     expected = file
 
     assert actual == expected
@@ -118,7 +117,7 @@ def test_merge_one_default():
         "SOME_VAR": "env",
     }
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader._merge(defaults, file, env)
     expected = env
 
     assert actual == expected
@@ -132,7 +131,7 @@ def test_merge_one_default():
         "OTHER_VAR": "env",
     }
 
-    actual = loader.merge(defaults, file, env)
+    actual = loader._merge(defaults, file, env)
     expected = {
         "SOME_VAR": "env",
     }
@@ -140,35 +139,34 @@ def test_merge_one_default():
     assert actual == expected
 
 
-# loader.load_file() tests.
-def test_load_file_nonexistent_no_raise():
+def test__load_secrets_file_nonexistent_no_raise():
     """Should return an empty dict with no file."""
-    actual = loader.load_file("not_a_file", raise_bad_format=False)
+    actual = loader._load_secrets_file("not_a_file", raise_bad_format=False)
     expected = {}
 
     assert actual == expected
 
 
-def test_load_file_nonexistent_raise():
+def test__load_secrets_file_nonexistent_raise():
     """Should return an empty dict with no file."""
-    actual = loader.load_file("not_a_file", raise_bad_format=True)
+    actual = loader._load_secrets_file("not_a_file", raise_bad_format=True)
     expected = {}
 
     assert actual == expected
 
-    actual = loader.load_file("not_a_file")
+    actual = loader._load_secrets_file("not_a_file")
     expected = {}
 
     assert actual == expected
 
 
-def test_load_file_nonexistent_warn():
+def test__load_secrets_file_nonexistent_warn():
     """Should warn on non-existent file."""
     with pytest.warns(UserWarning):
-        loader.load_file("not_a_file")
+        loader._load_secrets_file("not_a_file")
 
 
-def test_load_file_valid_toml(fs):
+def test__load_secrets_file_valid_toml(fs):
     """Should return a dict from valid TOML."""
     # Need a fake file here.
     fn = ".env"
@@ -176,7 +174,7 @@ def test_load_file_valid_toml(fs):
     with open(fn, "w") as file:
         file.write('SOME_VAR = "this is TOML"')
 
-    actual = loader.load_file(fn)
+    actual = loader._load_secrets_file(fn)
     expected = {
         "SOME_VAR": "this is TOML",
     }
@@ -184,7 +182,7 @@ def test_load_file_valid_toml(fs):
     assert actual == expected
 
 
-def test_load_file_valid_json(fs):
+def test__load_secrets_file_valid_json(fs):
     """Should return a dict from valid JSON."""
     # Need a fake file here.
     fn = ".env"
@@ -192,7 +190,7 @@ def test_load_file_valid_json(fs):
     with open(fn, "w") as file:
         file.write('{\n  "SOME_VAR": "this is JSON"\n}')
 
-    actual = loader.load_file(fn)
+    actual = loader._load_secrets_file(fn)
     expected = {
         "SOME_VAR": "this is JSON",
     }
@@ -200,7 +198,7 @@ def test_load_file_valid_json(fs):
     assert actual == expected
 
 
-def test_load_file_valid_yaml(fs):
+def test__load_secrets_file_valid_yaml(fs):
     """Should return a dict from valid YAML."""
     # Need a fake file here.
     fn = ".env"
@@ -208,7 +206,7 @@ def test_load_file_valid_yaml(fs):
     with open(fn, "w") as file:
         file.write("SOME_VAR: this is YAML")
 
-    actual = loader.load_file(fn)
+    actual = loader._load_secrets_file(fn)
     expected = {
         "SOME_VAR": "this is YAML",
     }
@@ -216,7 +214,7 @@ def test_load_file_valid_yaml(fs):
     assert actual == expected
 
 
-def test_load_file_valid_bespon(fs):
+def test__load_secrets_file_valid_bespon(fs):
     """Should return a dict from valid BespON."""
     # Need a fake file here.
     fn = ".env"
@@ -224,7 +222,7 @@ def test_load_file_valid_bespon(fs):
     with open(fn, "w") as file:
         file.write("|=== one\ntwo = three\n|===/\n")
 
-    actual = loader.load_file(fn)
+    actual = loader._load_secrets_file(fn)
     expected = {
         "one": {
             "two": "three",
@@ -243,10 +241,10 @@ def test_load_bad_format_raise(fs):
         file.write("{{yaml:sucks}}")
 
     with pytest.raises(ImproperlyConfigured):
-        loader.load_file(fn)
+        loader._load_secrets_file(fn)
 
     with pytest.raises(ImproperlyConfigured):
-        loader.load_file(fn, raise_bad_format=True)
+        loader._load_secrets_file(fn, raise_bad_format=True)
 
 
 def test_load_bad_format_no_raise(fs):
@@ -257,7 +255,7 @@ def test_load_bad_format_no_raise(fs):
     with open(fn, "w") as file:
         file.write("{{yaml:sucks}}")
 
-    actual = loader.load_file(fn, raise_bad_format=False)
+    actual = loader._load_secrets_file(fn, raise_bad_format=False)
     expected = {}
 
     assert actual == expected
@@ -285,137 +283,41 @@ def test_generate_secret_key_successive_keys_different():
     assert one != two
 
 
-# loader.validate_not_empty_string() tests.
-def test_validate_not_empty_string_string():
-    """Should return ``True`` on a string."""
-    name = "NON_EMPTY_STRING"
-    val = "string"
-
-    assert loader.validate_not_empty_string(name, val) is True
-
-
-def test_validate_not_empty_string_empty_string():
-    """Should raise exception on an empty string."""
-    name = "EMPTY_STRING"
-    val = ""
-
-    with pytest.raises(ImproperlyConfigured):
-        loader.validate_not_empty_string(name, val)
-
-
-# loader.validate_falsy() tests.
-def test_validate_falsy_falsy_values():
-    """Should return ``True`` for falsy values."""
-    name = "FALSY_VALUE"
-    values = [
-        False,
-        None,
-        "",
-        0,
-        0x0,
-        0o0,
-        0.0,
-        [],
-        {},
-    ]
-
-    for val in values:
-        assert loader.validate_falsy(name, val) is True
-
-
-def test_validate_falsy_truthy_values():
-    """Should raise an exception for truthy values."""
-    name = "FALSY_VALUE"
-    values = [
-        True,
-        "hi",
-        1,
-        0x1,
-        0o1,
-        0.1,
-        ["hi"],
-        {"hi": "lois"},
-    ]
-
-    for val in values:
-        with pytest.raises(ImproperlyConfigured):
-            loader.validate_falsy(name, val)
-
-
-# loader.validate_truthy() tests.
-def test_validate_truthy_falsy_values():
-    """Should raise an exception for falsy values."""
-    name = "TRUTHY_VALUE"
-    values = [
-        False,
-        None,
-        "",
-        0,
-        0x0,
-        0o0,
-        0.0,
-        [],
-        {},
-    ]
-
-    for val in values:
-        with pytest.raises(ImproperlyConfigured):
-            loader.validate_truthy(name, val)
-
-
-def test_validate_truthy_truthy_values():
-    """Should return ``True`` for truthy values."""
-    name = "TRUTHY_VALUE"
-    values = [
-        True,
-        "hi",
-        1,
-        0x1,
-        0o1,
-        0.1,
-        ["hi"],
-        {"hi": "lois"},
-    ]
-
-    for val in values:
-        assert loader.validate_truthy(name, val) is True
-
-
-def test_load_environment(monkeypatch):
+def test__load_secrets_environment(monkeypatch):
     """Should load environment dict with default prefix."""
     monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "test")
     expected = {
         "TEST_VAR": "test",
     }
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
 
-def test_load_environment_prefix(monkeypatch):
+def test__load_secrets_environment_prefix(monkeypatch):
     """Should load environment dict with custom prefix."""
     monkeypatch.setenv("MY_APP_PREFIX_TEST_VAR", "test")
     expected = {
         "TEST_VAR": "test",
     }
-    actual = loader.load_environment(prefix="MY_APP_PREFIX_")
+    actual = loader._load_secrets_environment(prefix="MY_APP_PREFIX_")
 
     assert actual == expected
 
 
-def test_load_environment_no_prefix(monkeypatch):
+def test__load_secrets_environment_no_prefix(monkeypatch):
     """Should load empty dict with unprefixed variables."""
     monkeypatch.setenv("TEST_VAR", "test")
     expected = {}
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
 
-def test_load_environment_missing():
+def test__load_secrets_environment_missing():
     """Should load empty dict with no environment variables."""
     expected = {}
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
@@ -432,7 +334,7 @@ def test_load_list(monkeypatch):
             "orange",
         ],
     }
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
@@ -451,7 +353,7 @@ def test_load_nested_list(monkeypatch):
             ],
         },
     }
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
@@ -468,7 +370,7 @@ def test_load_dict(monkeypatch):
             "ORANGE": "5",
         },
     }
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
@@ -487,7 +389,7 @@ def test_load_nested_dict(monkeypatch):
             },
         },
     }
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
@@ -532,7 +434,7 @@ def test_load_mixed(monkeypatch):
             },
         },
     }
-    actual = loader.load_environment()
+    actual = loader._load_secrets_environment()
 
     assert actual == expected
 
@@ -545,7 +447,7 @@ def test_load_mixed_duplicate(monkeypatch):
     monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
 
     with pytest.raises(ImproperlyConfigured):
-        loader.load_environment()
+        loader._load_secrets_environment()
 
 
 def test_dump_mixed(monkeypatch):
@@ -578,7 +480,7 @@ export DJANGO_ENV_FOOD__FRUIT__APPLE='2'
 export DJANGO_ENV_FOOD__FRUIT__BANANA='3'
 export DJANGO_ENV_FOOD__FRUIT__ORANGE='5'"""
 
-    actual = loader.dump_environment(loader.load_environment())
+    actual = loader._dump_secrets_environment(loader._load_secrets_environment())
 
     assert actual == expected
 
@@ -613,7 +515,9 @@ DJANGO_ENV_FOOD__FRUIT__APPLE='2'
 DJANGO_ENV_FOOD__FRUIT__BANANA='3'
 DJANGO_ENV_FOOD__FRUIT__ORANGE='5'"""
 
-    actual = loader.dump_environment(loader.load_environment(), export=False)
+    actual = loader._dump_secrets_environment(
+        loader._load_secrets_environment(), export=False
+    )
 
     assert actual == expected
 
@@ -693,7 +597,6 @@ def test_convert_listdict_to_list():
     assert loader._convert_listdict_to_list(listdict) == expected
 
 
-# loader.dump_secrets() tests.
 def test_dump_secrets_toml():
     """Should dump valid TOML."""
     config = {

@@ -8,7 +8,7 @@
 #
 # ******************************************************************************
 
-"""loader.py tests."""
+"""django-loader validation tests."""
 
 from pathlib import Path
 
@@ -18,18 +18,18 @@ from django.core.exceptions import ImproperlyConfigured
 import loader
 
 
-def test_validate_file_format_raise_no_file():
+def test__validate_file_format_raise_no_file():
     """Should raise with no file."""
     # Non-existent file name.
     fn = "not-a-file"
 
     with pytest.raises(ImproperlyConfigured) as error:
-        loader.validate_file_format(fn)
+        loader._validate_file_format(fn)
 
     assert str(error.value) == f"Secrets file {Path(fn).resolve()} does not exist."
 
 
-def test_validate_file_format_raise_no_format(fs):
+def test__validate_file_format_raise_no_format(fs):
     """Should raise with no format."""
     fn = ".env"
     fs.create_file(fn)
@@ -37,7 +37,7 @@ def test_validate_file_format_raise_no_format(fs):
         file.write("{ blah ]")
 
     with pytest.raises(ImproperlyConfigured) as error:
-        loader.validate_file_format(fn)
+        loader._validate_file_format(fn)
 
     assert (
         str(error.value)
@@ -45,20 +45,20 @@ def test_validate_file_format_raise_no_format(fs):
     )
 
 
-def test_validate_file_format_valid_toml(fs, capsys):
+def test__validate_file_format_valid_toml(fs, capsys):
     """Should return ``True``."""
     fn = ".env"
     fs.create_file(fn)
     with open(fn, "w") as file:
         file.write("a = 1")
 
-    assert loader.validate_file_format(fn) is True
+    assert loader._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert f"Secrets file {Path(fn).resolve()} recognized as TOML." in out
 
 
-def test_validate_file_format_valid_json(fs, capsys):
+def test__validate_file_format_valid_json(fs, capsys):
     """Should return ``True``."""
     fn = ".env"
     fs.create_file(fn)
@@ -66,7 +66,7 @@ def test_validate_file_format_valid_json(fs, capsys):
     with open(fn, "w") as file:
         file.write('{"one": "two"}')
 
-    assert loader.validate_file_format(fn) is True
+    assert loader._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert "toml error" in out
@@ -74,7 +74,7 @@ def test_validate_file_format_valid_json(fs, capsys):
     assert f"Secrets file {Path(fn).resolve()} recognized as JSON." in out
 
 
-def test_validate_file_format_valid_yaml(fs, capsys):
+def test__validate_file_format_valid_yaml(fs, capsys):
     """Should return ``True``."""
     fn = ".env"
     fs.create_file(fn)
@@ -82,7 +82,7 @@ def test_validate_file_format_valid_yaml(fs, capsys):
     with open(fn, "w") as file:
         file.write("---\n- name: WCFM deployment\n")
 
-    assert loader.validate_file_format(fn) is True
+    assert loader._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert "toml error" in out
@@ -92,7 +92,7 @@ def test_validate_file_format_valid_yaml(fs, capsys):
     assert f"Secrets file {Path(fn).resolve()} recognized as YAML." in out
 
 
-def test_validate_file_format_valid_bespon(fs, capsys):
+def test__validate_file_format_valid_bespon(fs, capsys):
     """Should return ``True``."""
     fn = ".env"
     fs.create_file(fn)
@@ -100,7 +100,7 @@ def test_validate_file_format_valid_bespon(fs, capsys):
     with open(fn, "w") as file:
         file.write("|=== one\ntwo = three\n|===/\n")
 
-    assert loader.validate_file_format(fn) is True
+    assert loader._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert "toml error" in out
