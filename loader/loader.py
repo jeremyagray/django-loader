@@ -176,10 +176,7 @@ def _load_secrets_environment(prefix="DJANGO_ENV_"):
     for key, value in os.environ.items():
         if key.startswith(prefix):
             # Find the prefixed values and strip the prefix.
-            if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
-                name = key[len(prefix) :]
-            else:
-                name = key.removeprefix(prefix)
+            name = key.removeprefix(prefix)
 
             if "__" not in name:
                 # Find the non-dict and non-list pairs and add them to

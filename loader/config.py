@@ -128,10 +128,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         )
 
         sys.exit(0)
-
-
-def _field_list_handler(s):
-    if len(s) == 0:
-        return []
-    else:
-        return [item.strip() for item in s.split(",")]
