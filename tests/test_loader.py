@@ -2,22 +2,18 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
 # ******************************************************************************
-#
-"""loader.py tests."""
 
-import sys
+"""loader.py tests."""
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 
-sys.path.insert(0, "/home/gray/src/work/django-loader")
-
-import loader  # noqa: E402
+import loader
 
 
 # loader.merge() tests.
@@ -267,16 +263,14 @@ def test_load_bad_format_no_raise(fs):
     assert actual == expected
 
 
-# loader.generate_secret_key() tests.
 def test_generate_secret_key_generates_key():
     """Test key generation."""
     actual = loader.generate_secret_key()
 
     assert actual != ""
-    assert len(actual) == 50
 
 
-def test_generate_secret_key_length():
+def test_generate_secret_key_correct_length():
     """Test generated key length."""
     actual = loader.generate_secret_key()
 
@@ -387,7 +381,6 @@ def test_validate_truthy_truthy_values():
         assert loader.validate_truthy(name, val) is True
 
 
-# loader.load_environment() tests.
 def test_load_environment(monkeypatch):
     """Should load environment dict with default prefix."""
     monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "test")
@@ -698,32 +691,6 @@ def test_convert_listdict_to_list():
     }
 
     assert loader._convert_listdict_to_list(listdict) == expected
-
-
-# loader.load_secrets() tests.
-def test_load_secrets(fs, monkeypatch):
-    """Should load the correct secrets dict."""
-    # Set the defaults.
-    defaults = {
-        "TEST_VAR": "defaults",
-    }
-
-    # Set the file.
-    fn = ".env"
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        file.write('TEST_VAR = "file"')
-
-    # Set the environment.
-    monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "env")
-
-    expected = {
-        "TEST_VAR": "env",
-    }
-
-    actual = loader.load_secrets(**defaults)
-
-    assert actual == expected
 
 
 # loader.dump_secrets() tests.

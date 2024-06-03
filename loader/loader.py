@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: MIT
 #
 # ******************************************************************************
-#
+
 """Load Django settings.
 
 Load Django settings from defaults, files, or the environment, in that
@@ -45,7 +45,11 @@ def generate_secret_key():
     return get_random_secret_key()
 
 
-def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
+def load_secrets(
+    fn=None,
+    prefix="DJANGO_ENV_",
+    **kwargs,
+):
     """Load a list of configuration variables.
 
     Return a dictionary of configuration variables, as loaded from a
@@ -57,9 +61,10 @@ def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
     Parameters
     ----------
     fn : str, optional
-        Configuration filename, defaults to ``.env``.  May be in TOML,
-        JSON, YAML, or BespON formats.  Formats will be attempted in this
-        order.
+        Configuration filename, defaults to ``.env`` if not defined in
+        the environment as ``DJANGO_LOADER_ENV_FILE``.  May be in
+        TOML, JSON, YAML, or BespON formats.  Formats will be
+        attempted in this order.
     prefix : str, optional
         Prefix for environment variables.  This prefix will be
         prepended to all variable names before searching for them in
@@ -73,6 +78,9 @@ def load_secrets(fn=".env", prefix="DJANGO_ENV_", **kwargs):
     dict
         A dictionary of configuration variables and their values.
     """
+    if fn is None:
+        fn = os.getenv("DJANGO_LOADER_ENV_FILE", ".env")
+
     return merge(kwargs, load_file(fn), load_environment(prefix))
 
 

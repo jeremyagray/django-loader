@@ -2,23 +2,20 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
 # ******************************************************************************
-#
+
 """loader.py tests."""
 
-import sys
 from pathlib import Path
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 
-sys.path.insert(0, "/home/gray/src/work/django-loader")
-
-import loader  # noqa: E402
+import loader
 
 
 def test_validate_file_format_raise_no_file():
