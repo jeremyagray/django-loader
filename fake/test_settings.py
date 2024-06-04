@@ -18,10 +18,7 @@ def test_load_secrets():
     actual = settings.ALLOWED_HOSTS
     expected = [
         "127.0.0.1",
-        "192.168.1.67",
-        "192.168.1.78",
         "localhost",
-        "vulcan",
         "testserver",
     ]
 

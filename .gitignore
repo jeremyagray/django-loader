@@ -2,7 +2,7 @@
 #
 # django-loader, a configuration and secret loader for Django
 #
-# Copyright 2021-2023 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2021-2024 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -21,6 +21,7 @@
 .venv
 __pycache__
 build
+db.sqlite3
 dist
 django_loader.egg-info
 docs/_build
