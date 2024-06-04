@@ -126,7 +126,7 @@ def test_load_secrets_files_overwrite_defaults(fs):
 
 
 def test_load_secrets_environment_overwrites_defaults(fs, monkeypatch):
-    """Environment variables should overwrite the files."""
+    """Environment variables should overwrite the defaults."""
     # Set the defaults.
     defaults = {
         "TEST_VAR": "defaults",
@@ -157,6 +157,82 @@ def test_load_secrets_environment_overwrites_files(fs, monkeypatch):
 
     # Create the environment variable.
     monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "environment")
+
+    expected = {
+        "TEST_VAR": "environment",
+    }
+
+    actual = DSL.load_secrets(**defaults)
+
+    assert actual == expected
+
+
+def test_load_secrets_files_only_overwrite_defaults(fs):
+    """Files should only overwrite available defaults."""
+    # Set the defaults.
+    defaults = {
+        "TEST_VAR": "defaults",
+    }
+
+    # Create the file.
+    fn = ".env"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write(
+            r"""TEST_VAR = "file"
+TEST_VAR2 = "two"
+"""
+        )
+
+    expected = {
+        "TEST_VAR": "file",
+    }
+
+    actual = DSL.load_secrets(**defaults)
+
+    assert actual == expected
+
+
+def test_load_secrets_environment_only_overwrites_defaults(fs, monkeypatch):
+    """Environment variables should only overwrite available defaults."""
+    # Set the defaults.
+    defaults = {
+        "TEST_VAR": "defaults",
+    }
+
+    # Create the environment variable.
+    monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "environment")
+    monkeypatch.setenv("DJANGO_ENV_TEST_VAR2", "environment2")
+
+    expected = {
+        "TEST_VAR": "environment",
+    }
+
+    actual = DSL.load_secrets(**defaults)
+
+    assert actual == expected
+
+
+def test_load_secrets_environment_files_only_overwrites_defaults(fs, monkeypatch):
+    """New variables should only overwrite available defaults."""
+    # Set the defaults.
+    defaults = {
+        "TEST_VAR": "test",
+    }
+
+    # Create the file.
+    fn = ".env"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write(
+            r"""TEST_VAR = "file"
+TEST_VAR2 = "file2"
+"""
+        )
+
+    # Create the environment variable.
+    monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "environment")
+    monkeypatch.setenv("DJANGO_ENV_TEST_VAR2", "environment2")
 
     expected = {
         "TEST_VAR": "environment",

@@ -92,6 +92,11 @@ def load_secrets(
     configuration file or the environment.  Default key/value pairs
     may be passed as ``kwargs``.
 
+    If defaults are provided, then only the variables in defaults will
+    be the only ones that can be set from files or the environment.
+    If there are no defaults, then any variable can be set from files
+    or the environment.
+
     Parameters
     ----------
     fn : str, optional
