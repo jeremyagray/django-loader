@@ -126,7 +126,7 @@ classifiers = [
 ]
 
 packages = [
-  { include = "loader" },
+  { include = "djangosecretsloader" },
 ]
 
 [tool.poetry.dependencies]
@@ -149,7 +149,7 @@ tox = ">=4"
 
 [tool.poetry.scripts]
 
-django-loader = "loader:main"
+dsloader = "djangosecretsloader:main"
 
 [tool.poetry.urls]
 

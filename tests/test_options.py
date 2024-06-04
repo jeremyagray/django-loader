@@ -12,18 +12,18 @@
 
 import pytest
 
-import loader
+import djangosecretsloader as DSL
 
 
 def test_generate_secret_key():
     """Should exit with a 0 return value.."""
     with pytest.raises(SystemExit) as error:
-        loader.main(["-g"])
+        DSL.main(["-g"])
 
     assert str(error.value) == "0"
 
     with pytest.raises(SystemExit) as error:
-        loader.main(["--generate"])
+        DSL.main(["--generate"])
 
     assert str(error.value) == "0"
 
@@ -36,12 +36,12 @@ def test_validate_secrets_good_file(fs):
         file.write("a = 1")
 
     with pytest.raises(SystemExit) as error:
-        loader.main(["-V"])
+        DSL.main(["-V"])
 
     assert str(error.value) == "0"
 
     with pytest.raises(SystemExit) as error:
-        loader.main(["--validate-secrets"])
+        DSL.main(["--validate-secrets"])
 
     assert str(error.value) == "0"
 
@@ -54,7 +54,7 @@ def test_validate_secrets_bad_file(fs):
         file.write("{ blah ]")
 
     with pytest.raises(SystemExit) as error:
-        loader.main(["-V"])
+        DSL.main(["-V"])
 
     assert str(error.value) == "1"
 
@@ -89,14 +89,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
     with pytest.raises(SystemExit):
-        loader.main(["--show-license"])
+        DSL.main(["--show-license"])
 
         actual = capsys.readouterr().out
 
         assert actual == expected
 
     with pytest.raises(SystemExit):
-        loader.main(["--show-warranty"])
+        DSL.main(["--show-warranty"])
 
         actual = capsys.readouterr().out
 

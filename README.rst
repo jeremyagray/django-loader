@@ -49,9 +49,10 @@ or::
 Usage
 =====
 
-  >>> import loader
-  >>> secrets = loader.load_secrets(**{"SECRET_KEY": ""})
-  >>> SECRET_KEY = secrets["SECRET_KEY"]
+  >>> import djangosecretsloader as DSL
+  >>> secrets = DSL.load_secrets(**{"MY_TOP_SECRET": "shhh!"})
+  >>> secrets["MY_TOP_SECRET"]
+  'shhh!'
 
 See the source and `documentation
 <https://django-loader.readthedocs.io/en/latest/>`_ for more

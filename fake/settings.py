@@ -12,7 +12,7 @@
 
 from pathlib import Path
 
-import loader
+import djangosecretsloader as DSL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +24,7 @@ SECRET_KEY = (
 )
 DEBUG = True
 
-secrets = loader.load_secrets(
+secrets = DSL.load_secrets(
     **{
         "ALLOWED_HOSTS": [],
     }

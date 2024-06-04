@@ -10,7 +10,7 @@
 
 """``load_secrets`` tests."""
 
-import loader
+import djangosecretsloader as DSL
 
 
 def test_load_secrets_from_defaults(fs):
@@ -24,7 +24,7 @@ def test_load_secrets_from_defaults(fs):
         "TEST_VAR": "defaults",
     }
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected
 
@@ -44,7 +44,7 @@ def test_load_secrets_from_default_file(fs):
         "TEST_VAR": "file",
     }
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected
 
@@ -64,7 +64,7 @@ def test_load_secrets_from_specified_file(fs):
         "TEST_VAR": "secret_file",
     }
 
-    actual = loader.load_secrets(".env.secret", **defaults)
+    actual = DSL.load_secrets(".env.secret", **defaults)
 
     assert actual == expected
 
@@ -86,7 +86,7 @@ def test_load_secrets_from_environment_specified_file(fs, monkeypatch):
         "TEST_VAR": "secret_file",
     }
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected
 
@@ -98,7 +98,7 @@ def test_load_secrets_load_nothing(fs):
 
     expected = {}
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected
 
@@ -120,7 +120,7 @@ def test_load_secrets_files_overwrite_defaults(fs):
         "TEST_VAR": "file",
     }
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected
 
@@ -139,7 +139,7 @@ def test_load_secrets_environment_overwrites_defaults(fs, monkeypatch):
         "TEST_VAR": "environment",
     }
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected
 
@@ -162,6 +162,6 @@ def test_load_secrets_environment_overwrites_files(fs, monkeypatch):
         "TEST_VAR": "environment",
     }
 
-    actual = loader.load_secrets(**defaults)
+    actual = DSL.load_secrets(**defaults)
 
     assert actual == expected

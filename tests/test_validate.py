@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 
-import loader
+import djangosecretsloader as DSL
 
 
 def test__validate_file_format_raise_no_file():
@@ -24,7 +24,7 @@ def test__validate_file_format_raise_no_file():
     fn = "not-a-file"
 
     with pytest.raises(ImproperlyConfigured) as error:
-        loader._validate_file_format(fn)
+        DSL._validate_file_format(fn)
 
     assert str(error.value) == f"Secrets file {Path(fn).resolve()} does not exist."
 
@@ -37,7 +37,7 @@ def test__validate_file_format_raise_no_format(fs):
         file.write("{ blah ]")
 
     with pytest.raises(ImproperlyConfigured) as error:
-        loader._validate_file_format(fn)
+        DSL._validate_file_format(fn)
 
     assert (
         str(error.value)
@@ -52,7 +52,7 @@ def test__validate_file_format_valid_toml(fs, capsys):
     with open(fn, "w") as file:
         file.write("a = 1")
 
-    assert loader._validate_file_format(fn) is True
+    assert DSL._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert f"Secrets file {Path(fn).resolve()} recognized as TOML." in out
@@ -66,7 +66,7 @@ def test__validate_file_format_valid_json(fs, capsys):
     with open(fn, "w") as file:
         file.write('{"one": "two"}')
 
-    assert loader._validate_file_format(fn) is True
+    assert DSL._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert "toml error" in out
@@ -82,7 +82,7 @@ def test__validate_file_format_valid_yaml(fs, capsys):
     with open(fn, "w") as file:
         file.write("---\n- name: WCFM deployment\n")
 
-    assert loader._validate_file_format(fn) is True
+    assert DSL._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert "toml error" in out
@@ -100,7 +100,7 @@ def test__validate_file_format_valid_bespon(fs, capsys):
     with open(fn, "w") as file:
         file.write("|=== one\ntwo = three\n|===/\n")
 
-    assert loader._validate_file_format(fn) is True
+    assert DSL._validate_file_format(fn) is True
 
     out = capsys.readouterr().out
     assert "toml error" in out

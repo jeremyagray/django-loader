@@ -13,7 +13,7 @@
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 
-import loader
+import djangosecretsloader as DSL
 
 
 def test__merge_empty_defaults():
@@ -21,7 +21,7 @@ def test__merge_empty_defaults():
     file = {}
     env = {}
 
-    actual = loader._merge({}, file, env)
+    actual = DSL._merge({}, file, env)
     expected = {}
 
     assert actual == expected
@@ -31,7 +31,7 @@ def test__merge_empty_defaults():
     }
     env = {}
 
-    actual = loader._merge({}, file, env)
+    actual = DSL._merge({}, file, env)
     expected = {
         "SOME_VAR": "test",
     }
@@ -43,7 +43,7 @@ def test__merge_empty_defaults():
         "SOME_VAR": "test",
     }
 
-    actual = loader._merge({}, file, env)
+    actual = DSL._merge({}, file, env)
     expected = {
         "SOME_VAR": "test",
     }
@@ -57,7 +57,7 @@ def test__merge_empty_defaults():
         "OTHER_VAR": "test",
     }
 
-    actual = loader._merge({}, file, env)
+    actual = DSL._merge({}, file, env)
     expected = {
         "SOME_VAR": "test",
         "OTHER_VAR": "test",
@@ -74,7 +74,7 @@ def test__merge_one_default():
     file = {}
     env = {}
 
-    actual = loader._merge(defaults, file, env)
+    actual = DSL._merge(defaults, file, env)
     expected = defaults
 
     assert actual == expected
@@ -84,7 +84,7 @@ def test__merge_one_default():
     }
     env = {}
 
-    actual = loader._merge(defaults, file, env)
+    actual = DSL._merge(defaults, file, env)
     expected = file
 
     assert actual == expected
@@ -93,7 +93,7 @@ def test__merge_one_default():
         "SOME_VAR": "env",
     }
 
-    actual = loader._merge(defaults, file, env)
+    actual = DSL._merge(defaults, file, env)
     expected = env
 
     assert actual == expected
@@ -105,7 +105,7 @@ def test__merge_one_default():
         "OTHER_VAR": "env",
     }
 
-    actual = loader._merge(defaults, file, env)
+    actual = DSL._merge(defaults, file, env)
     expected = file
 
     assert actual == expected
@@ -117,7 +117,7 @@ def test__merge_one_default():
         "SOME_VAR": "env",
     }
 
-    actual = loader._merge(defaults, file, env)
+    actual = DSL._merge(defaults, file, env)
     expected = env
 
     assert actual == expected
@@ -131,7 +131,7 @@ def test__merge_one_default():
         "OTHER_VAR": "env",
     }
 
-    actual = loader._merge(defaults, file, env)
+    actual = DSL._merge(defaults, file, env)
     expected = {
         "SOME_VAR": "env",
     }
@@ -141,7 +141,7 @@ def test__merge_one_default():
 
 def test__load_secrets_file_nonexistent_no_raise():
     """Should return an empty dict with no file."""
-    actual = loader._load_secrets_file("not_a_file", raise_bad_format=False)
+    actual = DSL._load_secrets_file("not_a_file", raise_bad_format=False)
     expected = {}
 
     assert actual == expected
@@ -149,12 +149,12 @@ def test__load_secrets_file_nonexistent_no_raise():
 
 def test__load_secrets_file_nonexistent_raise():
     """Should return an empty dict with no file."""
-    actual = loader._load_secrets_file("not_a_file", raise_bad_format=True)
+    actual = DSL._load_secrets_file("not_a_file", raise_bad_format=True)
     expected = {}
 
     assert actual == expected
 
-    actual = loader._load_secrets_file("not_a_file")
+    actual = DSL._load_secrets_file("not_a_file")
     expected = {}
 
     assert actual == expected
@@ -163,7 +163,7 @@ def test__load_secrets_file_nonexistent_raise():
 def test__load_secrets_file_nonexistent_warn():
     """Should warn on non-existent file."""
     with pytest.warns(UserWarning):
-        loader._load_secrets_file("not_a_file")
+        DSL._load_secrets_file("not_a_file")
 
 
 def test__load_secrets_file_valid_toml(fs):
@@ -174,7 +174,7 @@ def test__load_secrets_file_valid_toml(fs):
     with open(fn, "w") as file:
         file.write('SOME_VAR = "this is TOML"')
 
-    actual = loader._load_secrets_file(fn)
+    actual = DSL._load_secrets_file(fn)
     expected = {
         "SOME_VAR": "this is TOML",
     }
@@ -190,7 +190,7 @@ def test__load_secrets_file_valid_json(fs):
     with open(fn, "w") as file:
         file.write('{\n  "SOME_VAR": "this is JSON"\n}')
 
-    actual = loader._load_secrets_file(fn)
+    actual = DSL._load_secrets_file(fn)
     expected = {
         "SOME_VAR": "this is JSON",
     }
@@ -206,7 +206,7 @@ def test__load_secrets_file_valid_yaml(fs):
     with open(fn, "w") as file:
         file.write("SOME_VAR: this is YAML")
 
-    actual = loader._load_secrets_file(fn)
+    actual = DSL._load_secrets_file(fn)
     expected = {
         "SOME_VAR": "this is YAML",
     }
@@ -222,7 +222,7 @@ def test__load_secrets_file_valid_bespon(fs):
     with open(fn, "w") as file:
         file.write("|=== one\ntwo = three\n|===/\n")
 
-    actual = loader._load_secrets_file(fn)
+    actual = DSL._load_secrets_file(fn)
     expected = {
         "one": {
             "two": "three",
@@ -241,10 +241,10 @@ def test_load_bad_format_raise(fs):
         file.write("{{yaml:sucks}}")
 
     with pytest.raises(ImproperlyConfigured):
-        loader._load_secrets_file(fn)
+        DSL._load_secrets_file(fn)
 
     with pytest.raises(ImproperlyConfigured):
-        loader._load_secrets_file(fn, raise_bad_format=True)
+        DSL._load_secrets_file(fn, raise_bad_format=True)
 
 
 def test_load_bad_format_no_raise(fs):
@@ -255,7 +255,7 @@ def test_load_bad_format_no_raise(fs):
     with open(fn, "w") as file:
         file.write("{{yaml:sucks}}")
 
-    actual = loader._load_secrets_file(fn, raise_bad_format=False)
+    actual = DSL._load_secrets_file(fn, raise_bad_format=False)
     expected = {}
 
     assert actual == expected
@@ -263,22 +263,22 @@ def test_load_bad_format_no_raise(fs):
 
 def test_generate_secret_key_generates_key():
     """Test key generation."""
-    actual = loader.generate_secret_key()
+    actual = DSL.generate_secret_key()
 
     assert actual != ""
 
 
 def test_generate_secret_key_correct_length():
     """Test generated key length."""
-    actual = loader.generate_secret_key()
+    actual = DSL.generate_secret_key()
 
     assert len(actual) == 50
 
 
 def test_generate_secret_key_successive_keys_different():
     """Test that successive keys are different."""
-    one = loader.generate_secret_key()
-    two = loader.generate_secret_key()
+    one = DSL.generate_secret_key()
+    two = DSL.generate_secret_key()
 
     assert one != two
 
@@ -289,7 +289,7 @@ def test__load_secrets_environment(monkeypatch):
     expected = {
         "TEST_VAR": "test",
     }
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -300,7 +300,7 @@ def test__load_secrets_environment_prefix(monkeypatch):
     expected = {
         "TEST_VAR": "test",
     }
-    actual = loader._load_secrets_environment(prefix="MY_APP_PREFIX_")
+    actual = DSL._load_secrets_environment(prefix="MY_APP_PREFIX_")
 
     assert actual == expected
 
@@ -309,7 +309,7 @@ def test__load_secrets_environment_no_prefix(monkeypatch):
     """Should load empty dict with unprefixed variables."""
     monkeypatch.setenv("TEST_VAR", "test")
     expected = {}
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -317,7 +317,7 @@ def test__load_secrets_environment_no_prefix(monkeypatch):
 def test__load_secrets_environment_missing():
     """Should load empty dict with no environment variables."""
     expected = {}
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -334,7 +334,7 @@ def test_load_list(monkeypatch):
             "orange",
         ],
     }
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -353,7 +353,7 @@ def test_load_nested_list(monkeypatch):
             ],
         },
     }
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -370,7 +370,7 @@ def test_load_dict(monkeypatch):
             "ORANGE": "5",
         },
     }
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -389,7 +389,7 @@ def test_load_nested_dict(monkeypatch):
             },
         },
     }
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -434,7 +434,7 @@ def test_load_mixed(monkeypatch):
             },
         },
     }
-    actual = loader._load_secrets_environment()
+    actual = DSL._load_secrets_environment()
 
     assert actual == expected
 
@@ -447,7 +447,7 @@ def test_load_mixed_duplicate(monkeypatch):
     monkeypatch.setenv("DJANGO_ENV_FRUIT__ORANGE", "5")
 
     with pytest.raises(ImproperlyConfigured):
-        loader._load_secrets_environment()
+        DSL._load_secrets_environment()
 
 
 def test_dump_mixed(monkeypatch):
@@ -480,7 +480,7 @@ export DJANGO_ENV_FOOD__FRUIT__APPLE='2'
 export DJANGO_ENV_FOOD__FRUIT__BANANA='3'
 export DJANGO_ENV_FOOD__FRUIT__ORANGE='5'"""
 
-    actual = loader._dump_secrets_environment(loader._load_secrets_environment())
+    actual = DSL._dump_secrets_environment(DSL._load_secrets_environment())
 
     assert actual == expected
 
@@ -515,8 +515,8 @@ DJANGO_ENV_FOOD__FRUIT__APPLE='2'
 DJANGO_ENV_FOOD__FRUIT__BANANA='3'
 DJANGO_ENV_FOOD__FRUIT__ORANGE='5'"""
 
-    actual = loader._dump_secrets_environment(
-        loader._load_secrets_environment(), export=False
+    actual = DSL._dump_secrets_environment(
+        DSL._load_secrets_environment(), export=False
     )
 
     assert actual == expected
@@ -531,7 +531,7 @@ def test_keys_are_indices():
         "2": "orange",
     }
 
-    assert loader._keys_are_indices(ds) is True
+    assert DSL._keys_are_indices(ds) is True
 
     # Non-integer index.
     ds = {
@@ -547,7 +547,7 @@ def test_keys_are_indices():
         "2": "orange",
     }
 
-    assert loader._keys_are_indices(ds) is False
+    assert DSL._keys_are_indices(ds) is False
 
     # Non-sequential.
     ds = {
@@ -556,7 +556,7 @@ def test_keys_are_indices():
         "3": "orange",
     }
 
-    assert loader._keys_are_indices(ds) is False
+    assert DSL._keys_are_indices(ds) is False
 
 
 def test_convert_dict_to_list():
@@ -573,7 +573,7 @@ def test_convert_dict_to_list():
         "orange",
     ]
 
-    assert loader._convert_dict_to_list(listdict) == expected
+    assert DSL._convert_dict_to_list(listdict) == expected
 
 
 def test_convert_listdict_to_list():
@@ -594,7 +594,7 @@ def test_convert_listdict_to_list():
         ],
     }
 
-    assert loader._convert_listdict_to_list(listdict) == expected
+    assert DSL._convert_listdict_to_list(listdict) == expected
 
 
 def test_dump_secrets_toml():
@@ -603,7 +603,7 @@ def test_dump_secrets_toml():
         "SOME_VAR": "test",
     }
 
-    actual = loader.dump_secrets(**config)
+    actual = DSL.dump_secrets(**config)
     expected = 'SOME_VAR = "test"\n'
 
     assert actual == expected
@@ -615,7 +615,7 @@ def test_dump_secrets_json():
         "SOME_VAR": "test",
     }
 
-    actual = loader.dump_secrets(fmt="JSON", **config)
+    actual = DSL.dump_secrets(fmt="JSON", **config)
     expected = '{\n  "SOME_VAR": "test"\n}'
 
     assert actual == expected
@@ -627,7 +627,7 @@ def test_dump_secrets_yaml():
         "SOME_VAR": "test",
     }
 
-    actual = loader.dump_secrets(fmt="YAML", **config)
+    actual = DSL.dump_secrets(fmt="YAML", **config)
     expected = "{SOME_VAR: test}\n"
 
     assert actual == expected
@@ -639,7 +639,7 @@ def test_dump_secrets_bespon():
         "SOME_VAR": "test",
     }
 
-    actual = loader.dump_secrets(fmt="BespON", **config)
+    actual = DSL.dump_secrets(fmt="BespON", **config)
     expected = "SOME_VAR = test\n"
 
     assert actual == expected
@@ -653,6 +653,6 @@ def test_dump_secrets_env():
 
     expected = "export DJANGO_ENV_SOME_VAR='test'"
 
-    actual = loader.dump_secrets(fmt="ENV", **config)
+    actual = DSL.dump_secrets(fmt="ENV", **config)
 
     assert actual == expected
