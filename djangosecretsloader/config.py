@@ -58,6 +58,15 @@ to redistribute it under certain conditions; type ``loader.py
     )
 
     parser.add_argument(
+        "-D",
+        "--defaults",
+        dest="defaults",
+        type=str,
+        nargs="+",
+        help="Default secrets values.",
+    )
+
+    parser.add_argument(
         "-d",
         "--dump-format",
         dest="dump",

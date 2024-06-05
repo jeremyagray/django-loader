@@ -52,7 +52,7 @@ def main(argv=None):
         except ImproperlyConfigured as error:
             print(error)
             sys.exit(1)
-    # FIXME:  load and dump environment
+    # Load and dump secrets.
     else:
         print(
             dump_secrets(
@@ -60,9 +60,11 @@ def main(argv=None):
                 **load_secrets(
                     fn=args.file,
                     prefix=args.prefix,
+                    **_process_defaults(args.defaults),
                 ),
             )
         )
+        sys.exit(0)
 
 
 def generate_secret_key():
@@ -156,6 +158,19 @@ def dump_secrets(fmt="TOML", **kwargs):
         return _dump_secrets_environment(kwargs)
 
 
+def _process_defaults(defaults):
+    """Process defaults passed as arguments.
+
+    Process a list of key/value defaults
+    """
+    if len(defaults) % 2 != 0:
+        raise ValueError(
+            f"keys and values must be passed as pairs; length was {len(defaults)}"
+        )
+
+    return _unflatten(dict(zip(defaults[::2], defaults[1::2])))
+
+
 def _load_secrets_environment(prefix="DJANGO_ENV_"):
     """Load Django configuration variables from the enviroment.
 
@@ -176,39 +191,58 @@ def _load_secrets_environment(prefix="DJANGO_ENV_"):
         A dictionary, possibly empty, of configuration variables and
         values.
     """
-    config = {}
+    raw = {}
 
     for key, value in os.environ.items():
         if key.startswith(prefix):
             # Find the prefixed values and strip the prefix.
-            name = key.removeprefix(prefix)
+            raw[key.removeprefix(prefix)] = value
 
-            if "__" not in name:
-                # Find the non-dict and non-list pairs and add them to
-                # the dict.
-                config[name] = value
-            else:
-                # Handle the flattened data structures, treating the
-                # list type variables as dicts.
-                # Based on:
-                # https://gist.github.com/fmder/494aaa2dd6f8c428cede
-                keys = name.split("__")
-                sub_config = config
-                for k in keys[:-1]:
-                    try:
-                        if not isinstance(sub_config[k], dict):
-                            raise ImproperlyConfigured(
-                                f"{k} is defined multiple times in the environment."
-                            )
-                        sub_config = sub_config[k]
-                    except KeyError:
-                        sub_config[k] = {}
-                        sub_config = sub_config[k]
-                sub_config[keys[-1]] = value
+    return _unflatten(raw)
 
-    config = _convert_listdict_to_list(config)
 
-    return config
+def _unflatten(raw):
+    """Unflatten a raw list of key/value options.
+
+    Unflatten a list of key/value options according to the rules for
+    scalars, dicts, and lists.
+
+    Parameters
+    ----------
+    raw : list
+        List of single key/value dicts.
+
+    Returns
+    -------
+    dict
+        The unflattened dictionary of configuration values.
+    """
+    config = {}
+
+    for name, value in raw.items():
+        if "__" not in name:
+            # Find scalars.
+            config[name] = value
+        else:
+            # Handle the flattened data structures, treating the
+            # list type variables as dicts.
+            # Based on:
+            # https://gist.github.com/fmder/494aaa2dd6f8c428cede
+            keys = name.split("__")
+            sub_config = config
+            for k in keys[:-1]:
+                try:
+                    if not isinstance(sub_config[k], dict):
+                        raise ImproperlyConfigured(
+                            f"{k} is defined multiple times in the environment."
+                        )
+                    sub_config = sub_config[k]
+                except KeyError:
+                    sub_config[k] = {}
+                    sub_config = sub_config[k]
+            sub_config[keys[-1]] = value
+
+    return _convert_listdict_to_list(config)
 
 
 def _load_secrets_file(fn, raise_bad_format=True):

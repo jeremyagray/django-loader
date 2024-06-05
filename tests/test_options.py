@@ -15,17 +15,81 @@ import pytest
 import djangosecretsloader as DSL
 
 
-def test_generate_secret_key():
-    """Should exit with a 0 return value.."""
+def test_default_arguments(capsys):
+    """Should dump default arguments."""
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "MY_VAR", "arguments"])
+
+        assert 'MY_VAR = "arguments"' in capsys.readouterr().out
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "MY_VAR", "arguments", "-d", "TOML"])
+
+        assert 'MY_VAR = "arguments"' in capsys.readouterr().out
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "MY_VAR", "arguments", "-d", "JSON"])
+
+        assert '"MY_VAR": "arguments"' in capsys.readouterr().out
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "MY_VAR", "arguments", "-d", "YAML"])
+
+        assert 'MY_VAR = "arguments"' in capsys.readouterr().out
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "MY_VAR", "arguments", "-d", "BespON"])
+
+        assert 'MY_VAR = "arguments"' in capsys.readouterr().out
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "MY_VAR", "arguments", "-d", "ENV"])
+
+        assert 'MY_VAR="arguments"' in capsys.readouterr().out
+
+
+def test_file_default_arguments(fs, capsys):
+    """Should dump file and default arguments."""
+    # Create a secrets file.
+    fn = ".env"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write(
+            r"""TEST_VAR = "file"
+TEST_VAR2 = "two"
+"""
+        )
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "TEST_VAR", "arguments", "-f", ".env"])
+
+        assert 'TEST_VAR = "file"' in capsys.readouterr().out
+
+
+def test_environment_default_arguments(monkeypatch, capsys):
+    """Should dump environment and default arguments."""
+    # Create the environment variable.
+    monkeypatch.setenv("DJANGO_ENV_TEST_VAR", "environment")
+
+    with pytest.raises(SystemExit):
+        DSL.main(["-D", "TEST_VAR", "arguments"])
+
+        assert 'TEST_VAR = "environment"' in capsys.readouterr().out
+
+
+def test_generate_secret_key(capsys):
+    """Should exit with a 0 return value."""
     with pytest.raises(SystemExit) as error:
         DSL.main(["-g"])
 
-    assert str(error.value) == "0"
+        assert len(capsys.readouterr().out().strip()) == 50
+        assert str(error.value) == "0"
 
     with pytest.raises(SystemExit) as error:
         DSL.main(["--generate"])
 
-    assert str(error.value) == "0"
+        assert len(capsys.readouterr().out().strip()) == 50
+        assert str(error.value) == "0"
 
 
 def test_validate_secrets_good_file(fs):

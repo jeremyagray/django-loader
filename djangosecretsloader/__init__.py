@@ -18,6 +18,7 @@ from .loader import _keys_are_indices
 from .loader import _load_secrets_environment
 from .loader import _load_secrets_file
 from .loader import _merge
+from .loader import _process_defaults
 from .loader import _validate_file_format
 from .loader import dump_secrets
 from .loader import generate_secret_key
